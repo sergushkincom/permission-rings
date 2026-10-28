@@ -22,6 +22,7 @@ import {
   type Expiry,
   type Policies,
 } from '@/lib/rings'
+import { EASE_SETTLE, TIMING } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 
 const OUTSIDE_ICON: Record<OutsideKind, typeof UserPlus> = {
@@ -63,11 +64,20 @@ type RingFieldProps = {
   policies: Policies
   selectedId: string | null
   stagger: boolean
-  recent: { ids: string[]; version: number }
+  landed: { ring: RingKey; version: number } | null
+  spotlight: string[] | null
+  candidateCount: number
   locked: Set<string>
   expiries: Record<string, Expiry>
   onSelect: (id: string | null) => void
   onDrop: (id: string, ring: RingKey) => void
+}
+
+const LAND_COLOR: Record<RingKey, string> = {
+  any: 'var(--settled)',
+  hours: 'var(--muted-foreground)',
+  ask: 'var(--alert)',
+  none: 'var(--muted-foreground)',
 }
 
 export function RingField({
@@ -75,7 +85,9 @@ export function RingField({
   policies,
   selectedId,
   stagger,
-  recent,
+  landed,
+  spotlight,
+  candidateCount,
   locked,
   expiries,
   onSelect,
@@ -179,6 +191,19 @@ export function RingField({
             />
           )
         })}
+        {landed && landed.ring !== 'none' && (
+          <circle
+            key={landed.version}
+            cx={CENTER}
+            cy={CENTER}
+            r={RING_RADIUS[landed.ring]}
+            fill="none"
+            stroke={LAND_COLOR[landed.ring]}
+            strokeWidth={2.5}
+            opacity={0}
+            className="anim-ring-land"
+          />
+        )}
       </svg>
 
       {CIRCLES.map(({ ring }) => {
@@ -231,7 +256,10 @@ export function RingField({
         const isDragging = drag?.id === entity.id
         const pos = isDragging ? { x: drag.x, y: drag.y } : target
         const selected = selectedId === entity.id
-        const flashed = recent.version > 0 && recent.ids.includes(entity.id)
+        const isCandidates = entity.kind === 'outside' && entity.party.kind === 'candidates'
+        const lit = spotlight?.includes(entity.id) ?? false
+        const dimmed = spotlight !== null && !lit
+        const scaled = hoverId === entity.id && !drag
         const selfSet = locked.has(entity.id)
         const expiry = expiries[entity.id]
         const label =
@@ -245,7 +273,7 @@ export function RingField({
               ]
                 .filter(Boolean)
                 .join(', ')
-            : `${entity.party.name}, ${RING_LABEL[ring]}`
+            : `${entity.party.name}, ${RING_LABEL[ring]}${isCandidates ? `, ${candidateCount} waiting` : ''}`
 
         return (
           <button
@@ -270,17 +298,27 @@ export function RingField({
               entity.kind === 'person'
                 ? 'bg-card text-chip-foreground'
                 : cn('border-2', BORDER[ring], ring === 'ask' ? 'bg-alert-soft text-alert' : 'bg-chip text-muted-foreground'),
-              selected && 'outline-2 outline-offset-[6px] outline-settled',
-              isDragging ? 'z-30 shadow-float' : hoverId === entity.id ? 'z-20' : 'z-10',
+              selected && !isCandidates && 'outline-2 outline-offset-[6px] outline-settled',
+              selected && isCandidates && 'outline-2 outline-offset-2 outline-alert',
+              lit && 'outline-2 outline-offset-2 outline-settled',
+              isDragging ? 'z-30 shadow-float' : hoverId === entity.id || lit ? 'z-20' : 'z-10',
             )}
             style={{
               width: entity.size,
               height: entity.size,
               fontSize: Math.max(10, Math.round(entity.size * 0.3)),
               transform: `translate(${pos.x - entity.size / 2}px, ${pos.y - entity.size / 2}px)`,
+              scale: scaled ? '1.06' : '1',
+              opacity: dimmed ? 0.4 : 1,
               transition: isDragging
                 ? 'none'
-                : `transform 520ms cubic-bezier(0.34, 1.2, 0.64, 1) ${stagger ? index * 28 : 0}ms`,
+                : [
+                    stagger
+                      ? `transform ${TIMING.travel}ms ${EASE_SETTLE} ${index * TIMING.travelStagger}ms`
+                      : `transform ${TIMING.settle}ms ${EASE_SETTLE} ${TIMING.settleDelay}ms`,
+                    'scale 120ms ease-out',
+                    'opacity 150ms ease-out',
+                  ].join(', '),
             }}
           >
             {entity.kind === 'person' ? (
@@ -311,12 +349,13 @@ export function RingField({
             ) : (
               <OutsideIcon kind={entity.party.kind} />
             )}
-            {flashed && (
+            {isCandidates && candidateCount > 0 && (
               <span
-                key={recent.version}
                 aria-hidden="true"
-                className="anim-moved-flash pointer-events-none absolute -inset-[3px] rounded-full border-2 border-alert"
-              />
+                className="pointer-events-none absolute -top-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full bg-[#EA580C] text-[10px] leading-none font-semibold tabular-nums text-white"
+              >
+                {candidateCount}
+              </span>
             )}
           </button>
         )
@@ -324,8 +363,9 @@ export function RingField({
 
       {hovered && hoveredPos && (
         <div
+          key={hovered.id}
           role="tooltip"
-          className="pointer-events-none absolute z-40 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-[6px] bg-tooltip px-2 py-1.5 text-xs text-white tabular-nums shadow-float"
+          className="anim-tooltip pointer-events-none absolute z-40 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-[6px] bg-tooltip px-2 py-1.5 text-xs text-white tabular-nums shadow-float"
           style={{ left: hoveredPos.x, top: hoveredPos.y - hovered.size / 2 - 10 }}
         >
           {hovered.kind === 'person'

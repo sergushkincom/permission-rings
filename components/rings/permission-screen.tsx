@@ -1,19 +1,27 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import type { ContextKey, RingKey } from '@/lib/panel-data'
+import { stepInward, waitingCount } from '@/lib/candidates'
+import { TIMING } from '@/lib/motion'
 import {
+  CONTEXTS,
   ENTITIES,
   LOCKED,
+  RING_LABEL,
   describeSwitch,
   initialPolicies,
   loopDays,
   tally,
   untilFriday,
+  type Entity,
   type Expiry,
   type ExpiryKind,
   type Policies,
 } from '@/lib/rings'
+import { cn } from '@/lib/utils'
+import { CandidatesPanel } from './candidates-panel'
 import { ContextSwitch } from './context-switch'
 import { Counter } from './counter'
 import { DetailPanel } from './detail-panel'
@@ -21,25 +29,44 @@ import { LegendPanel } from './legend-panel'
 import { Outcome } from './outcome'
 import { RequestQueue } from './request-queue'
 import { RingField } from './ring-field'
+import { StartBar } from './start-bar'
+import { UndoBar } from './undo-bar'
+
+type Snapshot = { policies: Policies; expiries: Record<string, Expiry> }
+type Toast = { id: number; text: string; before: Snapshot }
+
+const SWITCH_DURATION = TIMING.travel + TIMING.travelStagger * (ENTITIES.length - 1)
+
+const entityName = (e: Entity | undefined) => (e ? (e.kind === 'person' ? e.person.name : e.party.name) : '')
 
 export function PermissionScreen() {
+  const router = useRouter()
   const [context, setContext] = useState<ContextKey>('normal')
   const [policies, setPolicies] = useState<Policies>(initialPolicies)
   const [expiries, setExpiries] = useState<Record<string, Expiry>>({})
   const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [stagger, setStagger] = useState(false)
-  const [recent, setRecent] = useState<{ ids: string[]; version: number }>({ ids: [], version: 0 })
+  const [motion, setMotion] = useState<'drop' | 'switch'>('drop')
+  const [landed, setLanded] = useState<{ ring: RingKey; version: number } | null>(null)
   const [notice, setNotice] = useState<{ text: string; id: number } | null>(null)
+  const [toast, setToast] = useState<Toast | null>(null)
+  const [spotlight, setSpotlight] = useState<string[] | null>(null)
+  const [starting, setStarting] = useState(false)
 
   const counts = tally(policies, context)
   const days = loopDays(policies, context)
+  const waiting = waitingCount(policies, context)
   const selected = ENTITIES.find((e) => e.id === selectedId)
+  const candidatesSelected = selected?.kind === 'outside' && selected.party.kind === 'candidates'
+  const contextLabel = (ctx: ContextKey) => CONTEXTS.find((c) => c.key === ctx)?.label ?? ''
+
+  function announce(text: string) {
+    setToast((t) => ({ id: (t?.id ?? 0) + 1, text, before: { policies, expiries } }))
+  }
 
   function switchContext(next: ContextKey) {
     if (next === context) return
-    const { text, moved } = describeSwitch(policies, context, next)
-    setStagger(true)
-    setRecent((r) => ({ ids: moved, version: r.version + 1 }))
+    const { text } = describeSwitch(policies, context, next)
+    setMotion('switch')
     setNotice((n) => ({ text, id: (n?.id ?? 0) + 1 }))
     setContext(next)
   }
@@ -47,24 +74,49 @@ export function PermissionScreen() {
   function setRing(id: string, ctx: ContextKey, ring: RingKey) {
     if (LOCKED.has(id) || policies[id][ctx] === ring) return
     setPolicies((prev) => ({ ...prev, [id]: { ...prev[id], [ctx]: ring } }))
+    const until = expiries[id] ? ` ${expiries[id].label}` : ''
+    const where = ctx === context ? '' : ` in ${contextLabel(ctx)}`
+    announce(`${entityName(ENTITIES.find((e) => e.id === id))} moved to ${RING_LABEL[ring]}${until}${where}.`)
     if (ctx === context) {
-      setStagger(false)
-      setRecent((r) => ({ ids: [id], version: r.version + 1 }))
+      setMotion('drop')
+      setLanded((l) => ({ ring, version: (l?.version ?? 0) + 1 }))
     }
   }
 
   function setExpiry(id: string, kind: ExpiryKind | null) {
     if (LOCKED.has(id)) return
-    setExpiries((prev) => {
-      const next = { ...prev }
-      if (kind) next[id] = { kind, label: untilFriday(kind) }
-      else delete next[id]
-      return next
-    })
+    const next = { ...expiries }
+    if (kind) next[id] = { kind, label: untilFriday(kind) }
+    else delete next[id]
+    setExpiries(next)
+    const name = entityName(ENTITIES.find((e) => e.id === id))
+    const ring = RING_LABEL[policies[id][context]]
+    announce(kind ? `${name} stays in ${ring} ${next[id].label}.` : `${name} stays in ${ring} with no end date.`)
+  }
+
+  function undo() {
+    if (!toast) return
+    setMotion('drop')
+    setPolicies(toast.before.policies)
+    setExpiries(toast.before.expiries)
+    setToast(null)
+  }
+
+  function pickPerson(id: string) {
+    setSelectedId(id)
+    setRing(id, context, stepInward(policies[id][context]))
+  }
+
+  function start() {
+    if (starting) return
+    setStarting(true)
+    setToast(null)
+    router.prefetch('/loop')
+    setTimeout(() => router.push('/loop'), 600)
   }
 
   return (
-    <main className="min-h-dvh bg-canvas px-8 py-8 text-sm leading-5 text-body">
+    <main className="min-h-dvh bg-canvas px-8 pt-8 pb-24 text-sm leading-5 text-body">
       <div className="mx-auto flex max-w-[1096px] flex-col gap-4">
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-col gap-1">
@@ -89,26 +141,50 @@ export function PermissionScreen() {
             ring="any"
             label="Books over focus"
             value={counts.anyCount}
+            delay={motion === 'drop' ? TIMING.counterDelay : 0}
             caption={`${counts.anyHours.toFixed(1)} h of panel time a week`}
           />
-          <Counter ring="hours" label="Waits for open time" value={counts.hoursCount} caption="Inside their working hours" />
-          <Counter ring="ask" label="Asks you first" value={counts.askCount} caption="The scheduler sends you the request" />
-          <Outcome days={days} />
+          <Counter
+            ring="hours"
+            label="Waits for open time"
+            value={counts.hoursCount}
+            delay={motion === 'drop' ? TIMING.counterDelay : 0}
+            caption="Inside their working hours"
+          />
+          <Counter
+            ring="ask"
+            label="Asks you first"
+            value={counts.askCount}
+            delay={motion === 'drop' ? TIMING.counterDelay : 0}
+            caption="The scheduler sends you the request"
+          />
+          <Outcome
+            days={days}
+            delay={motion === 'drop' ? TIMING.daysDelay : 0}
+            duration={motion === 'drop' ? TIMING.count : SWITCH_DURATION}
+          />
         </dl>
 
         <RequestQueue />
 
+        <StartBar starting={starting} onStart={start} />
+
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr] lg:items-start">
           <section
             aria-label="Booking permission rings"
-            className="flex min-w-0 justify-center overflow-x-auto rounded-xl border border-border bg-card px-5 py-4"
+            className={cn(
+              'flex min-w-0 justify-center overflow-x-auto rounded-xl border border-border bg-card px-5 py-4 transition-opacity duration-300',
+              starting && 'opacity-50',
+            )}
           >
             <RingField
               context={context}
               policies={policies}
               selectedId={selectedId}
-              stagger={stagger}
-              recent={recent}
+              stagger={motion === 'switch'}
+              landed={landed}
+              spotlight={spotlight}
+              candidateCount={waiting}
               locked={LOCKED}
               expiries={expiries}
               onSelect={setSelectedId}
@@ -117,10 +193,18 @@ export function PermissionScreen() {
           </section>
 
           <aside
-            aria-label={selected ? 'Selected person' : 'Legend'}
+            aria-label={candidatesSelected ? 'Candidates in flight' : selected ? 'Selected person' : 'Legend'}
             className="rounded-xl border border-border bg-card px-5 py-4"
           >
-            {selected && selectedId ? (
+            {candidatesSelected ? (
+              <CandidatesPanel
+                policies={policies}
+                context={context}
+                onSpotlight={setSpotlight}
+                onPickPerson={pickPerson}
+                onClose={() => setSelectedId(null)}
+              />
+            ) : selected && selectedId ? (
               <DetailPanel
                 key={selectedId}
                 entity={selected}
@@ -142,6 +226,8 @@ export function PermissionScreen() {
           </aside>
         </div>
       </div>
+
+      <UndoBar toast={toast} onUndo={undo} onExpire={() => setToast(null)} />
     </main>
   )
 }

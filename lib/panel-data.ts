@@ -56,7 +56,7 @@ export const people: Person[] = [
       { name: 'Architecture review', length: '1 h' },
       { name: 'Roadmap review', length: '1 h' },
     ],
-    rings: { normal: 'any', release: 'ask', sprint: 'any' },
+    rings: { normal: 'ask', release: 'ask', sprint: 'any' },
   },
   {
     id: 'p02',
