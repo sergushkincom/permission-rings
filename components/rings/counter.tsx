@@ -22,7 +22,7 @@ export function Counter({ label, value, caption }: CounterProps) {
   return (
     <div className="flex flex-col gap-1">
       <dt className="text-[13px] text-muted-foreground">{label}</dt>
-      <dd className="grid text-4xl font-medium leading-tight tracking-tight tabular-nums text-foreground">
+      <dd className="grid font-display text-5xl leading-tight tracking-[-0.03em] tabular-nums text-foreground">
         {previousValue !== null && version > 0 && (
           <span key={`out-${version}`} aria-hidden="true" className="anim-number-out [grid-area:1/1]">
             {previousValue}

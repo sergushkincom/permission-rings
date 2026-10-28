@@ -38,12 +38,14 @@ export function PermissionScreen() {
   }
 
   return (
-    <main className="min-h-dvh bg-canvas px-8 py-8 text-sm text-foreground">
+    <main className="radix-wash min-h-dvh px-8 py-10 text-sm text-foreground">
       <div className="mx-auto flex max-w-[1140px] flex-col gap-6">
-        <header className="flex flex-wrap items-start justify-between gap-4">
+        <header className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-lg font-medium tracking-tight">Who the scheduler can book</h1>
-            <p className="mt-0.5 text-[13px] text-muted-foreground">Each face sized by interview hours a week</p>
+            <h1 className="font-display text-4xl leading-none tracking-[-0.04em] text-balance">
+              Who the scheduler can book
+            </h1>
+            <p className="mt-2 text-[15px] text-muted-foreground">Each face sized by interview hours a week</p>
           </div>
           <div className="flex flex-col items-end gap-2">
             <ContextSwitch value={context} onChange={switchContext} />
@@ -57,7 +59,7 @@ export function PermissionScreen() {
           </div>
         </header>
 
-        <dl className="grid grid-cols-3 gap-6 rounded-lg border border-hairline bg-card px-6 py-5 shadow-[0_1px_2px_rgb(0_0_0/0.03)]">
+        <dl className="grid grid-cols-3 gap-6 rounded-xl bg-card px-6 py-5 shadow-panel">
           <Counter
             label="Books over focus"
             value={counts.anyCount}
@@ -70,7 +72,7 @@ export function PermissionScreen() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
           <section
             aria-label="Booking permission rings"
-            className="flex min-w-0 flex-1 justify-center overflow-x-auto rounded-lg border border-hairline bg-card p-4 shadow-[0_1px_2px_rgb(0_0_0/0.03)]"
+            className="flex min-w-0 flex-1 justify-center overflow-x-auto rounded-xl bg-card p-4 shadow-panel"
           >
             <RingField
               context={context}
@@ -85,7 +87,7 @@ export function PermissionScreen() {
 
           <aside
             aria-label="Selected person"
-            className="w-full shrink-0 rounded-lg border border-hairline bg-card p-5 shadow-[0_1px_2px_rgb(0_0_0/0.03)] lg:w-[360px]"
+            className="w-full shrink-0 rounded-xl bg-card p-5 shadow-panel lg:w-[360px]"
           >
             <DetailPanel
               key={selectedId ?? 'none'}

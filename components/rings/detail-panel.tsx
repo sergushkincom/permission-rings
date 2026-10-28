@@ -29,7 +29,7 @@ export function DetailPanel({ entity, policy, context, onSetRing }: DetailPanelP
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="text-base font-medium text-foreground">
+        <h2 className="font-display text-2xl leading-tight tracking-[-0.02em] text-foreground">
           {entity.kind === 'person' ? entity.person.name : entity.party.name}
         </h2>
         <p className="mt-0.5 text-[13px] text-muted-foreground">
