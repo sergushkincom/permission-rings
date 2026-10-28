@@ -174,7 +174,7 @@ export function RingField({ context, policies, selectedId, stagger, recent, onSe
       </span>
 
       <img
-        src="/faces/you.png"
+        src="/faces/denys.png"
         alt="You, hiring manager"
         draggable={false}
         className="pointer-events-none absolute size-16 -translate-x-1/2 -translate-y-1/2 rounded-full object-cover ring-2 ring-card"
