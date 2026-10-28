@@ -94,7 +94,7 @@ export function RingField({
   onDrop,
 }: RingFieldProps) {
   const fieldRef = useRef<HTMLDivElement>(null)
-  const pressRef = useRef<{ id: string; x: number; y: number } | null>(null)
+  const pressRef = useRef<{ id: string; x: number; y: number; offsetX: number; offsetY: number } | null>(null)
   const draggedRef = useRef(false)
   const [drag, setDrag] = useState<DragState | null>(null)
   const [hoverId, setHoverId] = useState<string | null>(null)
@@ -110,16 +110,25 @@ export function RingField({
   function handlePointerDown(e: ReactPointerEvent<HTMLButtonElement>, entity: Entity) {
     if (e.button !== 0 || locked.has(entity.id)) return
     e.currentTarget.setPointerCapture(e.pointerId)
-    pressRef.current = { id: entity.id, x: e.clientX, y: e.clientY }
+    const pointer = toField(e)
+    const origin = polar(entity.angle, entityRadius(entity, policies[entity.id][context]))
+    pressRef.current = {
+      id: entity.id,
+      x: e.clientX,
+      y: e.clientY,
+      offsetX: pointer.x - origin.x,
+      offsetY: pointer.y - origin.y,
+    }
     draggedRef.current = false
   }
 
   function handlePointerMove(e: ReactPointerEvent<HTMLButtonElement>, entity: Entity) {
     const press = pressRef.current
     if (!press || press.id !== entity.id) return
-    if (!draggedRef.current && Math.hypot(e.clientX - press.x, e.clientY - press.y) < 4) return
+    if (!draggedRef.current && Math.hypot(e.clientX - press.x, e.clientY - press.y) < 8) return
     draggedRef.current = true
-    const p = toField(e)
+    const pointer = toField(e)
+    const p = { x: pointer.x - press.offsetX, y: pointer.y - press.offsetY }
     const distance = Math.hypot(p.x - CENTER, p.y - CENTER)
     if (entity.kind === 'person') {
       setDrag({ id: entity.id, ...p, ring: nearestRing(distance, PERSON_RINGS), valid: true })
