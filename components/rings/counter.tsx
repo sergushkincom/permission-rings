@@ -1,14 +1,17 @@
 'use client'
 
 import { useState } from 'react'
+import type { RingKey } from '@/lib/panel-data'
+import { StateMark } from './state-mark'
 
 type CounterProps = {
+  ring: RingKey
   label: string
   value: number
   caption: string
 }
 
-export function Counter({ label, value, caption }: CounterProps) {
+export function Counter({ ring, label, value, caption }: CounterProps) {
   const [seen, setSeen] = useState({ value, caption })
   const [previousValue, setPreviousValue] = useState<number | null>(null)
   const [version, setVersion] = useState(0)
@@ -21,8 +24,11 @@ export function Counter({ label, value, caption }: CounterProps) {
 
   return (
     <div className="flex flex-col gap-1">
-      <dt className="text-[13px] text-muted-foreground">{label}</dt>
-      <dd className="grid font-display text-5xl leading-tight tracking-[-0.03em] tabular-nums text-foreground">
+      <dt className="flex items-center gap-2 text-[13px] leading-[18px] text-muted-foreground">
+        <StateMark ring={ring} />
+        {label}
+      </dt>
+      <dd className="grid text-[32px] leading-9 font-semibold tabular-nums text-foreground">
         {previousValue !== null && version > 0 && (
           <span key={`out-${version}`} aria-hidden="true" className="anim-number-out [grid-area:1/1]">
             {previousValue}
@@ -32,11 +38,15 @@ export function Counter({ label, value, caption }: CounterProps) {
           {value}
         </span>
       </dd>
-      <dd
-        key={`caption-${version}`}
-        className={`text-[13px] tabular-nums text-muted-foreground ${version > 0 ? 'anim-caption-flash' : ''}`}
-      >
+      <dd className="flex items-center gap-2 text-[13px] leading-[18px] tabular-nums text-muted-foreground">
         {caption}
+        {version > 0 && (
+          <span
+            key={`changed-${version}`}
+            aria-hidden="true"
+            className="anim-moved-flash size-1.5 shrink-0 rounded-full bg-alert"
+          />
+        )}
       </dd>
     </div>
   )

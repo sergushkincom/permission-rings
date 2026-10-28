@@ -63,7 +63,7 @@ export type Entity =
 
 export function avatarSize(hours: number) {
   const t = Math.min(Math.max((hours - 0.5) / 6.8, 0), 1)
-  return Math.round(24 + t * 30)
+  return Math.round(22 + t * 34)
 }
 
 function buildEntities(): Entity[] {

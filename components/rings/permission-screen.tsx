@@ -7,6 +7,7 @@ import { ContextSwitch } from './context-switch'
 import { Counter } from './counter'
 import { DetailPanel } from './detail-panel'
 import { RingField } from './ring-field'
+import { SummaryPanel } from './summary-panel'
 
 export function PermissionScreen() {
   const [context, setContext] = useState<ContextKey>('normal')
@@ -38,20 +39,19 @@ export function PermissionScreen() {
   }
 
   return (
-    <main className="radix-wash min-h-dvh px-8 py-10 text-sm text-foreground">
-      <div className="mx-auto flex max-w-[1140px] flex-col gap-6">
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="font-display text-4xl leading-none tracking-[-0.04em] text-balance">
-              Who the scheduler can book
-            </h1>
-            <p className="mt-2 text-[15px] text-muted-foreground">Each face sized by interview hours a week</p>
+    <main className="min-h-dvh bg-canvas px-8 py-8 text-sm leading-5 text-body">
+      <div className="mx-auto flex max-w-[1096px] flex-col gap-4">
+        <header className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-xl leading-7 font-semibold text-balance text-foreground">Who the scheduler can book</h1>
+            <p className="text-[13px] leading-[18px] text-muted-foreground">Each face sized by interview hours a week</p>
           </div>
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex flex-col items-end gap-1">
             <ContextSwitch value={context} onChange={switchContext} />
-            <p aria-live="polite" className="h-4 text-xs tabular-nums text-alert">
+            <p aria-live="polite" className="h-[18px] text-[13px] leading-[18px] tabular-nums text-body">
               {notice && (
-                <span key={notice.id} className="anim-notice block">
+                <span key={notice.id} className="anim-notice flex items-center gap-2">
+                  <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-alert" />
                   {notice.text}
                 </span>
               )}
@@ -59,20 +59,21 @@ export function PermissionScreen() {
           </div>
         </header>
 
-        <dl className="grid grid-cols-3 gap-6 rounded-xl bg-card px-6 py-5 shadow-panel">
+        <dl className="grid grid-cols-1 gap-4 rounded-xl border border-border bg-card px-5 py-4 sm:grid-cols-3">
           <Counter
+            ring="any"
             label="Books over focus"
             value={counts.anyCount}
             caption={`${counts.anyHours.toFixed(1)} h of panel time a week`}
           />
-          <Counter label="Waits for open time" value={counts.hoursCount} caption="Inside their working hours" />
-          <Counter label="Asks you first" value={counts.askCount} caption="The scheduler sends you the request" />
+          <Counter ring="hours" label="Waits for open time" value={counts.hoursCount} caption="Inside their working hours" />
+          <Counter ring="ask" label="Asks you first" value={counts.askCount} caption="The scheduler sends you the request" />
         </dl>
 
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr] lg:items-start">
           <section
             aria-label="Booking permission rings"
-            className="flex min-w-0 flex-1 justify-center overflow-x-auto rounded-xl bg-card p-4 shadow-panel"
+            className="flex min-w-0 justify-center overflow-x-auto rounded-xl border border-border bg-card px-5 py-4"
           >
             <RingField
               context={context}
@@ -86,16 +87,21 @@ export function PermissionScreen() {
           </section>
 
           <aside
-            aria-label="Selected person"
-            className="w-full shrink-0 rounded-xl bg-card p-5 shadow-panel lg:w-[360px]"
+            aria-label={selected ? 'Selected person' : 'Who sits in each ring'}
+            className="rounded-xl border border-border bg-card px-5 py-4"
           >
-            <DetailPanel
-              key={selectedId ?? 'none'}
-              entity={selected}
-              policy={selectedId ? policies[selectedId] : undefined}
-              context={context}
-              onSetRing={(ctx, ring) => selectedId && setRing(selectedId, ctx, ring)}
-            />
+            {selected && selectedId ? (
+              <DetailPanel
+                key={selectedId}
+                entity={selected}
+                policy={policies[selectedId]}
+                context={context}
+                onSetRing={(ctx, ring) => setRing(selectedId, ctx, ring)}
+                onClose={() => setSelectedId(null)}
+              />
+            ) : (
+              <SummaryPanel policies={policies} context={context} onSelect={setSelectedId} />
+            )}
           </aside>
         </div>
       </div>

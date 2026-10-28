@@ -11,11 +11,7 @@ type ContextSwitchProps = {
 
 export function ContextSwitch({ value, onChange }: ContextSwitchProps) {
   return (
-    <div
-      role="radiogroup"
-      aria-label="Scheduling context"
-      className="inline-flex rounded-full bg-track p-1"
-    >
+    <div role="radiogroup" aria-label="Scheduling context" className="inline-flex rounded-lg bg-track p-[2px]">
       {CONTEXTS.map((c) => {
         const active = c.key === value
         return (
@@ -26,10 +22,8 @@ export function ContextSwitch({ value, onChange }: ContextSwitchProps) {
             aria-checked={active}
             onClick={() => onChange(c.key)}
             className={cn(
-              'rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-settled',
-              active
-                ? 'bg-foreground text-background'
-                : 'text-muted-foreground hover:text-foreground',
+              'rounded-[6px] px-3 py-1 text-[13px] leading-[18px] transition-colors outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-settled',
+              active ? 'bg-segment font-semibold text-foreground shadow-xs' : 'font-normal text-body hover:text-foreground',
             )}
           >
             {c.label}

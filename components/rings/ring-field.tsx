@@ -19,6 +19,7 @@ import {
   type Policies,
 } from '@/lib/rings'
 import { cn } from '@/lib/utils'
+import { StateMark } from './state-mark'
 
 const AVATAR_TINTS = ['bg-avatar-1', 'bg-avatar-2', 'bg-avatar-3', 'bg-avatar-4']
 
@@ -144,12 +145,10 @@ export function RingField({ context, policies, selectedId, stagger, recent, onSe
       {(['any', 'hours', 'ask'] as RingKey[]).map((ring) => (
         <span
           key={ring}
-          className={cn(
-            'pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap bg-card px-1.5 text-xs',
-            ring === 'any' ? 'text-settled' : 'text-muted-foreground',
-          )}
+          className="pointer-events-none absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-1 whitespace-nowrap bg-card px-2 text-[13px] leading-[18px] text-muted-foreground"
           style={{ left: CENTER, top: CENTER + RING_RADIUS[ring] }}
         >
+          <StateMark ring={ring} className="size-2.5" />
           {RING_LABEL[ring]}
         </span>
       ))}
@@ -168,7 +167,7 @@ export function RingField({ context, policies, selectedId, stagger, recent, onSe
       })}
 
       <span
-        className="pointer-events-none absolute whitespace-nowrap text-xs text-muted-foreground"
+        className="pointer-events-none absolute whitespace-nowrap text-[13px] leading-[18px] text-muted-foreground"
         style={{ left: 524, top: 612 }}
       >
         Outside the company
@@ -178,7 +177,7 @@ export function RingField({ context, policies, selectedId, stagger, recent, onSe
         src="/faces/you.png"
         alt="You, hiring manager"
         draggable={false}
-        className="pointer-events-none absolute size-16 -translate-x-1/2 -translate-y-1/2 rounded-full object-cover shadow-sm ring-2 ring-card"
+        className="pointer-events-none absolute size-16 -translate-x-1/2 -translate-y-1/2 rounded-full object-cover ring-2 ring-card"
         style={{ left: CENTER, top: CENTER }}
       />
 
@@ -211,13 +210,15 @@ export function RingField({ context, policies, selectedId, stagger, recent, onSe
             onBlur={() => setHoverId((h) => (h === entity.id ? null : h))}
             onClick={() => handleClick(entity.id)}
             className={cn(
-              'absolute left-0 top-0 flex items-center justify-center rounded-full font-medium outline-none',
-              'cursor-grab active:cursor-grabbing focus-visible:ring-2 focus-visible:ring-settled focus-visible:ring-offset-2 focus-visible:ring-offset-card',
+              'absolute left-0 top-0 flex items-center justify-center rounded-full font-semibold outline-none',
+              'cursor-grab active:cursor-grabbing focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-settled',
               entity.kind === 'person'
-                ? cn(AVATAR_TINTS[index % AVATAR_TINTS.length], 'text-foreground/80')
-                : 'bg-[color-mix(in_oklab,var(--alert)_12%,var(--card))] text-alert',
-              selected && 'ring-2 ring-settled ring-offset-2 ring-offset-card',
-              isDragging ? 'z-30 shadow-md' : hoverId === entity.id ? 'z-20' : 'z-10',
+                ? cn(AVATAR_TINTS[index % AVATAR_TINTS.length], 'text-chip-foreground')
+                : ring === 'ask'
+                  ? 'bg-alert-soft text-alert'
+                  : 'bg-chip text-muted-foreground',
+              selected && 'outline-2 outline-offset-4 outline-settled',
+              isDragging ? 'z-30 shadow-float' : hoverId === entity.id ? 'z-20' : 'z-10',
             )}
             style={{
               width: entity.size,
@@ -242,6 +243,7 @@ export function RingField({ context, policies, selectedId, stagger, recent, onSe
             ) : (
               <OutsideIcon kind={entity.party.kind} />
             )}
+            <AvatarState ring={ring} />
             {flashed && (
               <span
                 key={recent.version}
@@ -256,7 +258,7 @@ export function RingField({ context, policies, selectedId, stagger, recent, onSe
       {hovered && hoveredPos && (
         <div
           role="tooltip"
-          className="pointer-events-none absolute z-40 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-md bg-neutral-900 px-2 py-1 text-xs text-white tabular-nums shadow-sm ring-1 ring-white/10"
+          className="pointer-events-none absolute z-40 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-[6px] bg-tooltip px-2 py-1.5 text-xs text-white tabular-nums shadow-float"
           style={{ left: hoveredPos.x, top: hoveredPos.y - hovered.size / 2 - 8 }}
         >
           {hovered.kind === 'person'
@@ -266,6 +268,16 @@ export function RingField({ context, policies, selectedId, stagger, recent, onSe
       )}
     </div>
   )
+}
+
+function AvatarState({ ring }: { ring: RingKey }) {
+  const mark: Record<RingKey, string> = {
+    any: 'inset-0 border-2 border-settled',
+    hours: 'inset-0 border border-strong',
+    ask: '-inset-[3px] border-[1.5px] border-dashed border-alert',
+    none: 'inset-0 border border-strong',
+  }
+  return <span aria-hidden="true" className={cn('pointer-events-none absolute rounded-full', mark[ring])} />
 }
 
 function OutsideIcon({ kind }: { kind: OutsideKind }) {
