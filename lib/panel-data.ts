@@ -15,6 +15,7 @@ export type Person = {
   interviewsThisMonth: number
   meetings: { name: string; length: string }[]
   rings: RingPolicy
+  setBy: 'them' | 'you'
 }
 
 export type OutsideParty = {
@@ -25,11 +26,26 @@ export type OutsideParty = {
   rings: RingPolicy
 }
 
+export type BookingRequest = {
+  id: string
+  candidate: string
+  role: string
+  interviewerId: string
+  slot: string
+}
+
+export const requests: BookingRequest[] = [
+  { id: 'r1', candidate: 'Maya Lindgren', role: 'Senior product designer', interviewerId: 'p11', slot: 'Tue 3 Nov, 10:00' },
+  { id: 'r2', candidate: 'Daniel Okafor', role: 'Backend engineer', interviewerId: 'p14', slot: 'Wed 4 Nov, 14:30' },
+  { id: 'r3', candidate: 'Sofia Marques', role: 'Product manager', interviewerId: 'p12', slot: 'Thu 5 Nov, 11:00' },
+]
+
 export const manager = { name: 'You', role: 'Hiring manager', location: 'Munich' }
 
 export const people: Person[] = [
   {
     id: 'p01',
+    setBy: 'you',
     name: 'Jonas Becker',
     role: 'Engineering lead',
     location: 'Munich',
@@ -44,6 +60,7 @@ export const people: Person[] = [
   },
   {
     id: 'p02',
+    setBy: 'them',
     name: 'Priya Nair',
     role: 'Staff engineer',
     location: 'Munich',
@@ -59,6 +76,7 @@ export const people: Person[] = [
   },
   {
     id: 'p03',
+    setBy: 'you',
     name: 'Tomas Nowak',
     role: 'Backend engineer',
     location: 'Krakow',
@@ -74,6 +92,7 @@ export const people: Person[] = [
   },
   {
     id: 'p04',
+    setBy: 'you',
     name: 'Nadia Haddad',
     role: 'Platform engineer',
     location: 'Berlin',
@@ -88,6 +107,7 @@ export const people: Person[] = [
   },
   {
     id: 'p05',
+    setBy: 'them',
     name: 'Dana Whitfield',
     role: 'Design lead',
     location: 'Lisbon',
@@ -103,6 +123,7 @@ export const people: Person[] = [
   },
   {
     id: 'p06',
+    setBy: 'them',
     name: 'Oliver Grant',
     role: 'Product designer',
     location: 'Munich',
@@ -117,6 +138,7 @@ export const people: Person[] = [
   },
   {
     id: 'p07',
+    setBy: 'them',
     name: 'Ana Ferreira',
     role: 'Design systems',
     location: 'Lisbon',
@@ -131,6 +153,7 @@ export const people: Person[] = [
   },
   {
     id: 'p08',
+    setBy: 'them',
     name: 'Lukas Meyer',
     role: 'Group PM',
     location: 'Munich',
@@ -145,6 +168,7 @@ export const people: Person[] = [
   },
   {
     id: 'p09',
+    setBy: 'you',
     name: 'Ines Costa',
     role: 'Product manager',
     location: 'Porto',
@@ -160,6 +184,7 @@ export const people: Person[] = [
   },
   {
     id: 'p10',
+    setBy: 'you',
     name: 'Grace Lindqvist',
     role: 'Product manager',
     location: 'Stockholm',
@@ -175,6 +200,7 @@ export const people: Person[] = [
   },
   {
     id: 'p11',
+    setBy: 'them',
     name: 'Joana Pires',
     role: 'Director of product',
     location: 'Lisbon',
@@ -189,6 +215,7 @@ export const people: Person[] = [
   },
   {
     id: 'p12',
+    setBy: 'you',
     name: 'Arjun Rao',
     role: 'VP engineering',
     location: 'Munich',
@@ -204,6 +231,7 @@ export const people: Person[] = [
   },
   {
     id: 'p13',
+    setBy: 'them',
     name: 'Kofi Mensah',
     role: 'Head of design',
     location: 'Berlin',
@@ -219,6 +247,7 @@ export const people: Person[] = [
   },
   {
     id: 'p14',
+    setBy: 'you',
     name: 'Hannah Vogel',
     role: 'Chief of staff',
     location: 'Munich',

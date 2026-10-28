@@ -2,22 +2,37 @@
 
 import { useState } from 'react'
 import type { ContextKey, RingKey } from '@/lib/panel-data'
-import { ENTITIES, describeSwitch, initialPolicies, tally, type Policies } from '@/lib/rings'
+import {
+  ENTITIES,
+  LOCKED,
+  describeSwitch,
+  initialPolicies,
+  loopDays,
+  tally,
+  untilFriday,
+  type Expiry,
+  type ExpiryKind,
+  type Policies,
+} from '@/lib/rings'
 import { ContextSwitch } from './context-switch'
 import { Counter } from './counter'
 import { DetailPanel } from './detail-panel'
+import { LegendPanel } from './legend-panel'
+import { Outcome } from './outcome'
+import { RequestQueue } from './request-queue'
 import { RingField } from './ring-field'
-import { SummaryPanel } from './summary-panel'
 
 export function PermissionScreen() {
   const [context, setContext] = useState<ContextKey>('normal')
   const [policies, setPolicies] = useState<Policies>(initialPolicies)
+  const [expiries, setExpiries] = useState<Record<string, Expiry>>({})
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [stagger, setStagger] = useState(false)
   const [recent, setRecent] = useState<{ ids: string[]; version: number }>({ ids: [], version: 0 })
   const [notice, setNotice] = useState<{ text: string; id: number } | null>(null)
 
   const counts = tally(policies, context)
+  const days = loopDays(policies, context)
   const selected = ENTITIES.find((e) => e.id === selectedId)
 
   function switchContext(next: ContextKey) {
@@ -30,12 +45,22 @@ export function PermissionScreen() {
   }
 
   function setRing(id: string, ctx: ContextKey, ring: RingKey) {
-    if (policies[id][ctx] === ring) return
+    if (LOCKED.has(id) || policies[id][ctx] === ring) return
     setPolicies((prev) => ({ ...prev, [id]: { ...prev[id], [ctx]: ring } }))
     if (ctx === context) {
       setStagger(false)
       setRecent((r) => ({ ids: [id], version: r.version + 1 }))
     }
+  }
+
+  function setExpiry(id: string, kind: ExpiryKind | null) {
+    if (LOCKED.has(id)) return
+    setExpiries((prev) => {
+      const next = { ...prev }
+      if (kind) next[id] = { kind, label: untilFriday(kind) }
+      else delete next[id]
+      return next
+    })
   }
 
   return (
@@ -59,7 +84,7 @@ export function PermissionScreen() {
           </div>
         </header>
 
-        <dl className="grid grid-cols-1 gap-4 rounded-xl border border-border bg-card px-5 py-4 sm:grid-cols-3">
+        <dl className="grid grid-cols-1 gap-4 rounded-xl border border-border bg-card px-5 py-4 sm:grid-cols-[1fr_1fr_1fr_1.2fr] sm:gap-5">
           <Counter
             ring="any"
             label="Books over focus"
@@ -68,7 +93,10 @@ export function PermissionScreen() {
           />
           <Counter ring="hours" label="Waits for open time" value={counts.hoursCount} caption="Inside their working hours" />
           <Counter ring="ask" label="Asks you first" value={counts.askCount} caption="The scheduler sends you the request" />
+          <Outcome days={days} />
         </dl>
+
+        <RequestQueue />
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr] lg:items-start">
           <section
@@ -81,13 +109,15 @@ export function PermissionScreen() {
               selectedId={selectedId}
               stagger={stagger}
               recent={recent}
+              locked={LOCKED}
+              expiries={expiries}
               onSelect={setSelectedId}
               onDrop={(id, ring) => setRing(id, context, ring)}
             />
           </section>
 
           <aside
-            aria-label={selected ? 'Selected person' : 'Who sits in each ring'}
+            aria-label={selected ? 'Selected person' : 'Legend'}
             className="rounded-xl border border-border bg-card px-5 py-4"
           >
             {selected && selectedId ? (
@@ -96,11 +126,18 @@ export function PermissionScreen() {
                 entity={selected}
                 policy={policies[selectedId]}
                 context={context}
+                locked={LOCKED.has(selectedId)}
+                expiry={expiries[selectedId]}
                 onSetRing={(ctx, ring) => setRing(selectedId, ctx, ring)}
+                onSetExpiry={(kind) => setExpiry(selectedId, kind)}
                 onClose={() => setSelectedId(null)}
               />
             ) : (
-              <SummaryPanel policies={policies} context={context} onSelect={setSelectedId} />
+              <LegendPanel
+                counts={{ any: counts.anyCount, hours: counts.hoursCount, ask: counts.askCount }}
+                temporary={Object.keys(expiries).length}
+                selfSet={LOCKED.size}
+              />
             )}
           </aside>
         </div>

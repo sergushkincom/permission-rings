@@ -217,13 +217,38 @@
 @keyframes ring-alert {
   0%,
   45% {
-    stroke: var(--alert);
-    stroke-width: 2;
+    stroke-width: 3.5;
   }
   100% {
-    stroke: var(--hairline);
-    stroke-width: 1;
+    stroke-width: 1.5;
   }
+}
+
+@keyframes caption-better {
+  0%,
+  45% {
+    color: var(--settled);
+  }
+  100% {
+    color: var(--muted-foreground);
+  }
+}
+
+@keyframes caption-worse {
+  0%,
+  45% {
+    color: var(--alert);
+  }
+  100% {
+    color: var(--muted-foreground);
+  }
+}
+
+.anim-caption-better {
+  animation: caption-better 1.6s ease-out;
+}
+.anim-caption-worse {
+  animation: caption-worse 1.6s ease-out;
 }
 
 @keyframes moved-flash {
@@ -257,7 +282,9 @@
   .anim-number-in,
   .anim-notice,
   .anim-ring-alert,
-  .anim-moved-flash {
+  .anim-moved-flash,
+  .anim-caption-better,
+  .anim-caption-worse {
     animation-duration: 1ms;
   }
   [data-avatar] {

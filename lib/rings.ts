@@ -13,11 +13,18 @@ export const FIELD = 680
 export const CENTER = FIELD / 2
 
 export const RING_RADIUS: Record<RingKey, number> = {
-  any: 132,
-  hours: 204,
-  ask: 272,
-  none: 316,
+  any: 120,
+  hours: 184,
+  ask: 244,
+  none: 244,
 }
+
+export const OUTSIDE_SIZE = 26
+export const OUTSIDE_RADIUS = { ask: 298, none: 322 }
+export const SECTOR_LABEL_RADIUS = 304
+export const RING_LABEL_ANGLE = 205
+
+export const LOCKED = new Set(people.filter((p) => p.setBy === 'them').map((p) => p.id))
 
 export const PERSON_RINGS: RingKey[] = ['any', 'hours', 'ask']
 export const OUTSIDE_RINGS: RingKey[] = ['ask', 'none']
@@ -44,10 +51,10 @@ export const RING_HINT: Record<RingKey, string> = {
 }
 
 const SECTORS: Record<Sector, { label: string; center: number; spread: number }> = {
-  engineering: { label: 'Engineering', center: 315, spread: 31 },
+  engineering: { label: 'Engineering', center: 318, spread: 30 },
   leadership: { label: 'Leadership', center: 45, spread: 30 },
-  product: { label: 'Product', center: 112, spread: 20 },
-  design: { label: 'Design', center: 238, spread: 24 },
+  product: { label: 'Product', center: 112, spread: 22 },
+  design: { label: 'Design', center: 250, spread: 26 },
 }
 
 export const SECTOR_LABELS = (Object.keys(SECTORS) as Sector[]).map((key) => ({
@@ -61,9 +68,38 @@ export type Entity =
   | { kind: 'person'; id: string; angle: number; size: number; person: Person }
   | { kind: 'outside'; id: string; angle: number; size: number; party: OutsideParty }
 
+const HOURS = people.map((p) => p.interviewHoursPerWeek)
+const MIN_HOURS = Math.min(...HOURS)
+const MAX_HOURS = Math.max(...HOURS)
+
 export function avatarSize(hours: number) {
-  const t = Math.min(Math.max((hours - 0.5) / 6.8, 0), 1)
-  return Math.round(22 + t * 34)
+  const t = Math.min(Math.max((hours - MIN_HOURS) / (MAX_HOURS - MIN_HOURS), 0), 1)
+  return Math.round(28 + t * 36)
+}
+
+export function entityRadius(entity: Entity, ring: RingKey) {
+  if (entity.kind === 'outside') return ring === 'ask' ? OUTSIDE_RADIUS.ask : OUTSIDE_RADIUS.none
+  return RING_RADIUS[ring]
+}
+
+/** Median days to book a four-person loop. Monotonic: every move inward lowers it. */
+export function loopDays(policies: Policies, context: ContextKey) {
+  let score = 0
+  for (const p of people) {
+    const ring = policies[p.id][context]
+    if (ring === 'any') score += 1
+    else if (ring === 'hours') score += 0.45
+  }
+  return Math.round((1.5 + 9 * (1 - score / people.length)) * 10) / 10
+}
+
+export type ExpiryKind = 'week' | 'two'
+export type Expiry = { kind: ExpiryKind; label: string }
+
+export function untilFriday(kind: ExpiryKind) {
+  const d = new Date()
+  d.setDate(d.getDate() + ((5 - d.getDay() + 7) % 7) + (kind === 'two' ? 7 : 0))
+  return `until ${d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}`
 }
 
 function buildEntities(): Entity[] {
@@ -80,7 +116,7 @@ function buildEntities(): Entity[] {
     result.push({ kind: 'person', id: p.id, angle, size: avatarSize(p.interviewHoursPerWeek), person: p })
   }
   outside.forEach((party, i) => {
-    result.push({ kind: 'outside', id: party.id, angle: OUTSIDE_ANGLES[i] ?? 155, size: 30, party })
+    result.push({ kind: 'outside', id: party.id, angle: OUTSIDE_ANGLES[i] ?? 155, size: OUTSIDE_SIZE, party })
   })
   return result
 }
