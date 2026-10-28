@@ -244,6 +244,27 @@
   }
 }
 
+@keyframes flash-better {
+  0%,
+  45% {
+    color: var(--settled);
+  }
+}
+
+@keyframes flash-worse {
+  0%,
+  45% {
+    color: var(--alert);
+  }
+}
+
+.anim-flash-better {
+  animation: flash-better 1.6s ease-out;
+}
+.anim-flash-worse {
+  animation: flash-worse 1.6s ease-out;
+}
+
 .anim-caption-better {
   animation: caption-better 1.6s ease-out;
 }
@@ -284,7 +305,9 @@
   .anim-ring-alert,
   .anim-moved-flash,
   .anim-caption-better,
-  .anim-caption-worse {
+  .anim-caption-worse,
+  .anim-flash-better,
+  .anim-flash-worse {
     animation-duration: 1ms;
   }
   [data-avatar] {
