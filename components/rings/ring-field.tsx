@@ -174,13 +174,13 @@ export function RingField({ context, policies, selectedId, stagger, recent, onSe
         Outside the company
       </span>
 
-      <div
-        className="pointer-events-none absolute flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-foreground text-sm font-medium text-background"
+      <img
+        src="/faces/you.png"
+        alt="You, hiring manager"
+        draggable={false}
+        className="pointer-events-none absolute size-16 -translate-x-1/2 -translate-y-1/2 rounded-full object-cover shadow-sm ring-2 ring-card"
         style={{ left: CENTER, top: CENTER }}
-        aria-label="You, hiring manager"
-      >
-        You
-      </div>
+      />
 
       {ENTITIES.map((entity, index) => {
         const ring = policies[entity.id][context]
@@ -230,7 +230,15 @@ export function RingField({ context, policies, selectedId, stagger, recent, onSe
             }}
           >
             {entity.kind === 'person' ? (
-              <span aria-hidden="true">{initials(entity.person.name)}</span>
+              <>
+                <span aria-hidden="true">{initials(entity.person.name)}</span>
+                <img
+                  src={`/faces/${entity.id}.png`}
+                  alt=""
+                  draggable={false}
+                  className="pointer-events-none absolute inset-0 size-full rounded-full object-cover"
+                />
+              </>
             ) : (
               <OutsideIcon kind={entity.party.kind} />
             )}
