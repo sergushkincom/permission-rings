@@ -39,6 +39,8 @@
   --color-settled-soft: var(--settled-soft);
   --color-alert: var(--alert);
   --color-alert-soft: var(--alert-soft);
+  --color-settled-deep: var(--settled-deep);
+  --color-alert-deep: var(--alert-deep);
   --color-avatar-1: var(--avatar-1);
   --color-avatar-2: var(--avatar-2);
   --color-avatar-3: var(--avatar-3);
@@ -89,6 +91,8 @@
   --settled-soft: rgb(79 70 229 / 0.06);
   --alert: #ea580c;
   --alert-soft: rgb(234 88 12 / 0.1);
+  --settled-deep: #4338ca;
+  --alert-deep: #c2410c;
   --avatar-1: #f2f4f7;
   --avatar-2: #eaecf0;
   --avatar-3: #f2f4f7;
@@ -129,6 +133,8 @@
   --settled-soft: rgb(129 140 248 / 0.08);
   --alert: #fb923c;
   --alert-soft: rgb(251 146 60 / 0.12);
+  --settled-deep: #a5b4fc;
+  --alert-deep: #fdba74;
   --avatar-1: #1f242f;
   --avatar-2: #333741;
   --avatar-3: #1f242f;
@@ -170,6 +176,8 @@
     --settled-soft: rgb(129 140 248 / 0.08);
     --alert: #fb923c;
     --alert-soft: rgb(251 146 60 / 0.12);
+  --settled-deep: #a5b4fc;
+  --alert-deep: #fdba74;
     --avatar-1: #1f242f;
     --avatar-2: #333741;
     --avatar-3: #1f242f;

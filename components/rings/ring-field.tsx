@@ -12,8 +12,6 @@ import {
   RING_LABEL,
   RING_LABEL_ANGLE,
   RING_RADIUS,
-  SECTOR_LABELS,
-  SECTOR_LABEL_RADIUS,
   entityRadius,
   initials,
   nearestRing,
@@ -31,10 +29,10 @@ const OUTSIDE_ICON: Record<OutsideKind, typeof UserPlus> = {
   vendor: ClipboardCheck,
 }
 
-const CIRCLES: { ring: 'any' | 'hours' | 'ask'; color: string; width: number }[] = [
-  { ring: 'ask', color: 'var(--alert)', width: 1.5 },
-  { ring: 'hours', color: 'var(--strong)', width: 1 },
-  { ring: 'any', color: 'var(--settled)', width: 1.5 },
+const CIRCLES: { ring: 'any' | 'hours' | 'ask'; color: string; width: number; opacity: number }[] = [
+  { ring: 'ask', color: 'var(--alert)', width: 1.5, opacity: 0.28 },
+  { ring: 'hours', color: 'var(--strong)', width: 1, opacity: 0.6 },
+  { ring: 'any', color: 'var(--settled)', width: 1.5, opacity: 0.32 },
 ]
 
 const RING_COLOR: Record<RingKey, string> = {
@@ -52,9 +50,9 @@ const BORDER: Record<RingKey, string> = {
 }
 
 const LABEL_TONE: Record<'any' | 'hours' | 'ask', string> = {
-  any: 'text-settled',
+  any: 'text-settled-deep',
   hours: 'text-muted-foreground',
-  ask: 'text-alert',
+  ask: 'text-alert-deep',
 }
 
 type DragState = { id: string; x: number; y: number; ring: RingKey; valid: boolean }
@@ -185,7 +183,7 @@ export function RingField({
         className="pointer-events-none absolute inset-0"
         aria-hidden="true"
       >
-        {CIRCLES.map(({ ring, color, width }) => {
+        {CIRCLES.map(({ ring, color, width, opacity }) => {
           const highlighted = highlightRing === ring
           return (
             <circle
@@ -196,7 +194,11 @@ export function RingField({
               fill="none"
               stroke={highlighted && !drag?.valid ? 'var(--alert)' : color}
               strokeWidth={highlighted ? 3 : width}
-              className={cn('transition-[stroke-width] duration-150', ring === 'ask' && rejectCount > 0 && 'anim-ring-alert')}
+              strokeOpacity={highlighted ? 1 : opacity}
+              className={cn(
+                'transition-[stroke-width,stroke-opacity] duration-150',
+                ring === 'ask' && rejectCount > 0 && 'anim-ring-alert',
+              )}
             />
           )
         })}
@@ -231,22 +233,9 @@ export function RingField({
         )
       })}
 
-      {SECTOR_LABELS.map((s) => {
-        const p = polar(s.center, SECTOR_LABEL_RADIUS)
-        return (
-          <span
-            key={s.key}
-            className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-[13px] text-muted-foreground"
-            style={{ left: p.x, top: p.y }}
-          >
-            {s.label}
-          </span>
-        )
-      })}
-
       <span
-        className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-[13px] leading-[18px] text-muted-foreground"
-        style={{ left: 482, top: 669 }}
+        className="pointer-events-none absolute -translate-x-full -translate-y-1/2 whitespace-nowrap text-[13px] leading-[18px] text-muted-foreground"
+        style={{ left: CENTER + 56, top: CENTER + 272 }}
       >
         Outside the company
       </span>

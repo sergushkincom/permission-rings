@@ -9,7 +9,8 @@ import {
   type Sector,
 } from './panel-data'
 
-export const FIELD = 680
+export const FIELD_PADDING = 40
+export const FIELD = 2 * (244 + FIELD_PADDING)
 export const CENTER = FIELD / 2
 
 export const RING_RADIUS: Record<RingKey, number> = {
@@ -20,8 +21,7 @@ export const RING_RADIUS: Record<RingKey, number> = {
 }
 
 export const OUTSIDE_SIZE = 26
-export const OUTSIDE_RADIUS = { ask: 298, none: 322 }
-export const SECTOR_LABEL_RADIUS = 304
+export const OUTSIDE_RADIUS = { ask: 266, none: 280 }
 export const RING_LABEL_ANGLE = 205
 
 export const LOCKED = new Set(people.filter((p) => p.setBy === 'them').map((p) => p.id))
@@ -56,11 +56,6 @@ const SECTORS: Record<Sector, { label: string; center: number; spread: number }>
   product: { label: 'Product', center: 112, spread: 22 },
   design: { label: 'Design', center: 250, spread: 26 },
 }
-
-export const SECTOR_LABELS = (Object.keys(SECTORS) as Sector[]).map((key) => ({
-  key,
-  ...SECTORS[key],
-}))
 
 const OUTSIDE_ANGLES = [141, 152, 163]
 

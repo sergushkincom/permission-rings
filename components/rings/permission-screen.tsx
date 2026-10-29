@@ -27,9 +27,8 @@ import { Counter } from './counter'
 import { DetailPanel } from './detail-panel'
 import { LegendPanel } from './legend-panel'
 import { Outcome } from './outcome'
-import { RequestQueue } from './request-queue'
+import { ActionBar } from './action-bar'
 import { RingField } from './ring-field'
-import { StartBar } from './start-bar'
 import { UndoBar } from './undo-bar'
 
 type Snapshot = { policies: Policies; expiries: Record<string, Expiry> }
@@ -117,7 +116,7 @@ export function PermissionScreen() {
 
   return (
     <main className="min-h-dvh bg-canvas px-8 pt-8 pb-24 text-sm leading-5 text-body">
-      <div className="mx-auto flex max-w-[1096px] flex-col gap-4">
+      <div className="mx-auto flex max-w-[946px] flex-col gap-4">
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-col gap-1">
             <h1 className="text-xl leading-7 font-semibold text-balance text-foreground">Who the scheduler can book</h1>
@@ -165,15 +164,13 @@ export function PermissionScreen() {
           />
         </dl>
 
-        <RequestQueue />
+        <ActionBar starting={starting} onStart={start} />
 
-        <StartBar starting={starting} onStart={start} />
-
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr] lg:items-start">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
           <section
             aria-label="Booking permission rings"
             className={cn(
-              'flex min-w-0 justify-center overflow-x-auto rounded-xl border border-border bg-card px-5 py-4 transition-opacity duration-300',
+              'max-w-full shrink-0 self-center overflow-x-auto rounded-xl border border-border bg-card transition-opacity duration-300 lg:self-start',
               starting && 'opacity-50',
             )}
           >
@@ -194,7 +191,7 @@ export function PermissionScreen() {
 
           <aside
             aria-label={candidatesSelected ? 'Candidates in flight' : selected ? 'Selected person' : 'Legend'}
-            className="rounded-xl border border-border bg-card px-5 py-4"
+            className="min-w-0 rounded-xl border border-border bg-card px-5 py-4 lg:flex-1"
           >
             {candidatesSelected ? (
               <CandidatesPanel
