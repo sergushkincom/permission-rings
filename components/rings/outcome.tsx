@@ -42,8 +42,8 @@ export function Outcome({ days, delay, duration }: OutcomeProps) {
   const timing = { animationDelay: `${delay}ms` }
 
   return (
-    <div className="flex flex-col gap-1 sm:border-l sm:border-hairline sm:pl-5">
-      <dt className="text-[13px] leading-[18px] text-muted-foreground">A four-person loop schedules in</dt>
+    <div className="flex min-w-0 flex-col gap-1 sm:-ml-2.5 sm:border-l sm:border-hairline sm:pl-2.5">
+      <dt className="text-[13px] leading-[18px] font-medium text-secondary-foreground">A four-person loop schedules in</dt>
       <dd className="flex items-baseline gap-1.5">
         <span className="sr-only">{`${days.toFixed(1)} days`}</span>
         <span
@@ -56,13 +56,13 @@ export function Outcome({ days, delay, duration }: OutcomeProps) {
         >
           {shown.toFixed(1)}
         </span>
-        <span aria-hidden="true" className="text-sm leading-5 font-medium text-muted-foreground">
+        <span aria-hidden="true" className="text-base leading-6 font-normal text-muted-foreground">
           days
         </span>
       </dd>
       <dd
         key={`caption-${change?.id ?? 0}`}
-        className={`text-[13px] leading-[18px] text-muted-foreground ${
+        className={`text-[13px] leading-[18px] font-normal text-muted-foreground ${
           change ? (change.direction === 'better' ? 'anim-caption-better' : 'anim-caption-worse') : ''
         }`}
         style={timing}

@@ -135,7 +135,7 @@ export function PermissionScreen() {
           </div>
         </header>
 
-        <dl className="grid grid-cols-1 gap-4 rounded-xl border border-border bg-card px-5 py-4 sm:grid-cols-[1fr_1fr_1fr_1.2fr] sm:gap-5">
+        <dl className="grid grid-cols-1 gap-4 rounded-xl border border-border bg-card px-5 py-4 sm:grid-cols-4 sm:gap-5">
           <Counter
             ring="any"
             label="Books over focus"
@@ -155,7 +155,7 @@ export function PermissionScreen() {
             label="Asks you first"
             value={counts.askCount}
             delay={motion === 'drop' ? TIMING.counterDelay : 0}
-            caption="The scheduler sends you the request"
+            caption="It sends you the request"
           />
           <Outcome
             days={days}

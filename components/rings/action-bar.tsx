@@ -25,7 +25,7 @@ export function ActionBar({ starting, onStart }: { starting: boolean; onStart: (
             className="flex items-center gap-2 rounded-md outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-settled"
           >
             <span aria-hidden="true" className={cn('size-2.5 shrink-0 rounded-full', count ? 'bg-alert' : 'bg-strong')} />
-            <span aria-live="polite" className="text-sm leading-5 font-semibold tabular-nums text-foreground">
+            <span aria-live="polite" className="text-sm leading-5 font-medium tabular-nums text-foreground">
               {count === 0 ? 'No requests waiting' : `${count} ${count === 1 ? 'request' : 'requests'} waiting`}
             </span>
             <ChevronDown
