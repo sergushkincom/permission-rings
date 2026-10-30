@@ -191,7 +191,7 @@ export function PermissionScreen() {
 
           <aside
             aria-label={candidatesSelected ? 'Candidates in flight' : selected ? 'Selected person' : 'Legend'}
-            className="min-w-0 rounded-xl border border-border bg-card px-5 py-4 lg:flex-1"
+            className="min-w-0 self-start rounded-xl border border-border bg-card px-4 py-3 lg:flex-1"
           >
             {candidatesSelected ? (
               <CandidatesPanel

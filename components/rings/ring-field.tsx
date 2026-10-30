@@ -257,7 +257,7 @@ export function RingField({
         const isCandidates = entity.kind === 'outside' && entity.party.kind === 'candidates'
         const lit = spotlight?.includes(entity.id) ?? false
         const dimmed = spotlight !== null && !lit
-        const scaled = hoverId === entity.id && !drag
+        const scaled = isDragging || (hoverId === entity.id && !drag)
         const selfSet = locked.has(entity.id)
         const expiry = expiries[entity.id]
         const label =
@@ -305,15 +305,15 @@ export function RingField({
               width: entity.size,
               height: entity.size,
               fontSize: Math.max(10, Math.round(entity.size * 0.3)),
-              transform: `translate(${pos.x - entity.size / 2}px, ${pos.y - entity.size / 2}px)`,
-              scale: scaled ? '1.06' : '1',
+              translate: `${pos.x - entity.size / 2}px ${pos.y - entity.size / 2}px`,
+              scale: scaled ? '1.08' : '1',
               opacity: dimmed ? 0.4 : 1,
               transition: isDragging
-                ? 'none'
+                ? 'scale 120ms ease-out'
                 : [
                     stagger
-                      ? `transform ${TIMING.travel}ms ${EASE_SETTLE} ${index * TIMING.travelStagger}ms`
-                      : `transform ${TIMING.settle}ms ${EASE_SETTLE} ${TIMING.settleDelay}ms`,
+                      ? `translate ${TIMING.travel}ms ${EASE_SETTLE} ${index * TIMING.travelStagger}ms`
+                      : `translate ${TIMING.settle}ms ${EASE_SETTLE} ${TIMING.settleDelay}ms`,
                     'scale 120ms ease-out',
                     'opacity 150ms ease-out',
                   ].join(', '),
