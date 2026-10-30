@@ -23,6 +23,10 @@ import {
 import { EASE_SETTLE, TIMING } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 
+const TOOLTIP_HEIGHT = 28
+const TOOLTIP_INSET = 8
+const TOOLTIP_HALF_WIDTH = 130
+
 const OUTSIDE_ICON: Record<OutsideKind, typeof UserPlus> = {
   candidates: UserPlus,
   agency: Briefcase,
@@ -166,6 +170,14 @@ export function RingField({
 
   const hovered = hoverId && !drag ? ENTITIES.find((e) => e.id === hoverId) : undefined
   const hoveredPos = hovered ? polar(hovered.angle, entityRadius(hovered, policies[hovered.id][context])) : null
+  const tooltipBelow = !!hovered && !!hoveredPos && hoveredPos.y - hovered.size / 2 - 10 - TOOLTIP_HEIGHT < TOOLTIP_INSET
+  const tooltipAlign: 'start' | 'center' | 'end' = !hoveredPos
+    ? 'center'
+    : hoveredPos.x < TOOLTIP_HALF_WIDTH
+      ? 'start'
+      : hoveredPos.x > FIELD - TOOLTIP_HALF_WIDTH
+        ? 'end'
+        : 'center'
 
   return (
     <div
@@ -363,8 +375,21 @@ export function RingField({
         <div
           key={hovered.id}
           role="tooltip"
-          className="anim-tooltip pointer-events-none absolute z-40 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-[6px] bg-tooltip px-2 py-1.5 text-xs text-white tabular-nums shadow-float"
-          style={{ left: hoveredPos.x, top: hoveredPos.y - hovered.size / 2 - 10 }}
+          className={cn(
+            'anim-tooltip pointer-events-none absolute z-40 whitespace-nowrap rounded-[6px] bg-tooltip px-2 py-1.5 text-xs text-white tabular-nums shadow-float',
+            tooltipBelow ? 'translate-y-0' : '-translate-y-full',
+            tooltipAlign === 'center' && '-translate-x-1/2',
+            tooltipAlign === 'end' && '-translate-x-full',
+          )}
+          style={{
+            left:
+              tooltipAlign === 'start'
+                ? Math.max(TOOLTIP_INSET, hoveredPos.x - hovered.size / 2)
+                : tooltipAlign === 'end'
+                  ? Math.min(FIELD - TOOLTIP_INSET, hoveredPos.x + hovered.size / 2)
+                  : hoveredPos.x,
+            top: tooltipBelow ? hoveredPos.y + hovered.size / 2 + 10 : hoveredPos.y - hovered.size / 2 - 10,
+          }}
         >
           {hovered.kind === 'person'
             ? `${hovered.person.name}, ${hovered.person.interviewHoursPerWeek} h a week${
