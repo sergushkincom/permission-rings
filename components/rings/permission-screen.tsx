@@ -8,6 +8,7 @@ import { TIMING } from '@/lib/motion'
 import {
   CONTEXTS,
   ENTITIES,
+  FIELD,
   LOCKED,
   RING_LABEL,
   describeSwitch,
@@ -25,6 +26,7 @@ import { CandidatesPanel } from './candidates-panel'
 import { ContextSwitch } from './context-switch'
 import { Counter } from './counter'
 import { DetailPanel } from './detail-panel'
+import { FitToWidth } from './fit-to-width'
 import { LegendPanel } from './legend-panel'
 import { Outcome } from './outcome'
 import { ActionBar } from './action-bar'
@@ -115,7 +117,7 @@ export function PermissionScreen() {
   }
 
   return (
-    <main className="min-h-dvh bg-canvas px-8 pt-8 pb-24 text-sm leading-5 text-body">
+    <main className="min-h-dvh bg-canvas px-4 pt-6 pb-24 sm:px-8 sm:pt-8 text-sm leading-5 text-body">
       <div className="mx-auto flex max-w-[946px] flex-col gap-4">
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-col gap-1">
@@ -135,7 +137,7 @@ export function PermissionScreen() {
           </div>
         </header>
 
-        <dl className="grid grid-cols-1 gap-4 rounded-xl border border-border bg-card px-5 py-4 sm:grid-cols-4 sm:gap-5">
+        <dl className="grid grid-cols-2 gap-x-4 gap-y-5 rounded-xl border border-border bg-card px-4 py-4 sm:grid-cols-4 sm:gap-5 sm:px-5">
           <Counter
             ring="any"
             label="Books over focus"
@@ -170,10 +172,11 @@ export function PermissionScreen() {
           <section
             aria-label="Booking permission rings"
             className={cn(
-              'max-w-full shrink-0 self-center overflow-x-auto rounded-xl border border-border bg-card transition-opacity duration-300 lg:self-start',
+              'flex w-full justify-center rounded-xl border border-border bg-card transition-opacity duration-300 lg:w-auto lg:shrink-0',
               starting && 'opacity-50',
             )}
           >
+            <FitToWidth size={FIELD}>
             <RingField
               context={context}
               policies={policies}
@@ -187,11 +190,12 @@ export function PermissionScreen() {
               onSelect={setSelectedId}
               onDrop={(id, ring) => setRing(id, context, ring)}
             />
+            </FitToWidth>
           </section>
 
           <aside
             aria-label={candidatesSelected ? 'Candidates in flight' : selected ? 'Selected person' : 'Legend'}
-            className="min-w-0 self-start rounded-xl border border-border bg-card px-4 py-3 lg:flex-1"
+            className="min-w-0 rounded-xl border border-border bg-card px-4 py-3 lg:flex-1 lg:self-start"
           >
             {candidatesSelected ? (
               <CandidatesPanel

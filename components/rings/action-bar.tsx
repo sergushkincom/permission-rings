@@ -35,11 +35,11 @@ export function ActionBar({ starting, onStart }: { starting: boolean; onStart: (
             <span className="sr-only">{open ? 'Hide requests' : 'Show requests'}</span>
           </button>
 
-          <span aria-hidden="true" className="h-5 w-px bg-hairline" />
+          <span aria-hidden="true" className="hidden h-5 w-px bg-hairline sm:block" />
 
           <div className="flex min-w-0 items-center gap-2">
             <span aria-hidden="true" className="size-2.5 shrink-0 rounded-full bg-settled" />
-            <span className="text-sm leading-5 font-semibold text-foreground">3 loops waiting</span>
+            <span className="whitespace-nowrap text-sm leading-5 font-semibold text-foreground">3 loops waiting</span>
             <span className="truncate text-[13px] leading-[18px] text-muted-foreground">
               Backend, Design systems, Product manager
             </span>
