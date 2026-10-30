@@ -8,7 +8,12 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 export const metadata: Metadata = {
   title: 'Who the scheduler can book',
   description: 'Set, per context, whose calendar the interview scheduler may take and under what conditions.',
-  generator: 'v0.app',
+  metadataBase: new URL('https://permission-rings.vercel.app'),
+  openGraph: {
+    title: 'Who the scheduler can book',
+    description: 'Permission rings for an interview panel — a design experiment.',
+    images: ['/preview-rings.png'],
+  },
   icons: {
     icon: [
       {
