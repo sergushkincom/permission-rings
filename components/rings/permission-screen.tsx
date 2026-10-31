@@ -23,6 +23,7 @@ import {
 } from '@/lib/rings'
 import { cn } from '@/lib/utils'
 import { CandidatesPanel } from './candidates-panel'
+import { ThemeSwitch } from '@/components/theme-switch'
 import { ContextSwitch } from './context-switch'
 import { Counter } from './counter'
 import { DetailPanel } from './detail-panel'
@@ -125,7 +126,10 @@ export function PermissionScreen() {
             <p className="text-[13px] leading-[18px] text-muted-foreground">Each face sized by interview hours a week</p>
           </div>
           <div className="flex flex-col items-end gap-1">
-            <ContextSwitch value={context} onChange={switchContext} />
+            <div className="flex items-center gap-3">
+              <ContextSwitch value={context} onChange={switchContext} />
+              <ThemeSwitch />
+            </div>
             <p aria-live="polite" className="h-[18px] text-[13px] leading-[18px] tabular-nums text-body">
               {notice && (
                 <span key={notice.id} className="anim-notice flex items-center gap-2">

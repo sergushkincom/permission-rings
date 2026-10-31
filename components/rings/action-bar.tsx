@@ -51,7 +51,7 @@ export function ActionBar({ starting, onStart }: { starting: boolean; onStart: (
           onClick={onStart}
           disabled={starting}
           aria-busy={starting}
-          className="grid h-9 shrink-0 items-center rounded-lg bg-settled px-4 text-sm leading-5 font-semibold text-white outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-settled disabled:cursor-default"
+          className="grid h-9 shrink-0 items-center rounded-lg bg-primary px-4 text-sm leading-5 font-semibold text-primary-foreground outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-settled disabled:cursor-default"
         >
           <span
             aria-hidden={starting}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { ThemeSwitch } from '@/components/theme-switch'
 import {
   NOW_LABEL,
   candidate,
@@ -116,9 +117,12 @@ export function LoopScreen() {
           <h1 className="text-xl leading-7 font-semibold text-foreground">{candidate.name}</h1>
           <p className="text-[13px] leading-[18px] text-muted-foreground">{candidate.detail}</p>
         </div>
-        <span className="shrink-0 rounded-full border border-strong px-3 py-1 text-[13px] leading-[18px] text-foreground">
-          {candidate.target}
-        </span>
+        <div className="flex shrink-0 items-center gap-3">
+          <span className="rounded-full border border-strong px-3 py-1 text-[13px] leading-[18px] text-foreground">
+            {candidate.target}
+          </span>
+          <ThemeSwitch />
+        </div>
       </header>
 
       <StateLine {...outlook} />

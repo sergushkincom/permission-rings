@@ -33,7 +33,7 @@ export function UndoBar({ toast, onUndo, onExpire }: UndoBarProps) {
       {toast && (
         <div
           className={cn(
-            'anim-undo-in pointer-events-auto flex h-11 items-center gap-6 rounded-lg bg-[#101828] px-4 text-[13px] leading-[18px] text-white shadow-float',
+            'anim-undo-in pointer-events-auto flex h-11 items-center gap-6 rounded-lg bg-tooltip px-4 text-[13px] leading-[18px] text-white shadow-float',
             leavingId === toast.id && 'anim-undo-out',
           )}
         >
@@ -41,7 +41,7 @@ export function UndoBar({ toast, onUndo, onExpire }: UndoBarProps) {
           <button
             type="button"
             onClick={onUndo}
-            className="font-semibold text-[#a4bcfd] underline-offset-4 outline-none hover:underline focus-visible:underline"
+            className="font-semibold text-[#a4bcfd] dark:text-settled-deep underline-offset-4 outline-none hover:underline focus-visible:underline"
           >
             Undo
           </button>

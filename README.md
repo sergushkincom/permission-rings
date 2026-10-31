@@ -35,6 +35,8 @@ out its plan in time — *Thu 09:00 asks Jonas again · Thu 17:00 proposes someo
 Fri 09:00 stops asking and hands the loop back to you* — and every underlined word in
 that plan is a choice you can change.
 
+Both screens follow the system theme, with a System / Light / Dark switch in the header.
+
 ## The decision moment
 
 Most agent permission models are a switch: the assistant can act, or it can't. The
@@ -92,7 +94,7 @@ you aimed at is the point you catch.
 
 Real calendars · real people · a settings page · teams or departments as groups ·
 permission inheritance · an audit log · notifications to the people whose ring
-changed · dark mode · mobile.
+changed · mobile.
 
 Each of those is a real feature. None of them helps answer the question above, and
 the list of things I chose not to build is part of the work.
