@@ -94,7 +94,7 @@ you aimed at is the point you catch.
 
 Real calendars · real people · a settings page · teams or departments as groups ·
 permission inheritance · an audit log · notifications to the people whose ring
-changed · mobile.
+changed · mobile. → changed · a phone-first layout.
 
 Each of those is a real feature. None of them helps answer the question above, and
 the list of things I chose not to build is part of the work.
