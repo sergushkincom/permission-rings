@@ -362,7 +362,7 @@ export function RingField({
             {isCandidates && candidateCount > 0 && (
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute -top-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full bg-[#EA580C] text-[10px] leading-none font-semibold tabular-nums text-white"
+                className="pointer-events-none absolute -top-1.5 -right-1.5 flex size-4 items-center justify-center rounded-full bg-alert text-[10px] leading-none font-semibold tabular-nums text-white"
               >
                 {candidateCount}
               </span>
