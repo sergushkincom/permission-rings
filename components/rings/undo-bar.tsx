@@ -15,7 +15,10 @@ type UndoBarProps = {
 export function UndoBar({ toast, onUndo, onExpire }: UndoBarProps) {
   const [leavingId, setLeavingId] = useState<number | null>(null)
   const expireRef = useRef(onExpire)
-  expireRef.current = onExpire
+  // Keep the latest onExpire without writing the ref during render.
+  useEffect(() => {
+    expireRef.current = onExpire
+  })
   const id = toast?.id
 
   useEffect(() => {

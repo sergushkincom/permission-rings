@@ -21,9 +21,12 @@ export function Outcome({ days, delay, duration }: OutcomeProps) {
     const from = shownRef.current
     if (from === days) return
     if (reduced) {
-      shownRef.current = days
-      setShown(days)
-      return
+      // Jump straight to the new value on the next frame (no count-up animation).
+      const jump = requestAnimationFrame(() => {
+        shownRef.current = days
+        setShown(days)
+      })
+      return () => cancelAnimationFrame(jump)
     }
     const start = performance.now() + delay
     let frame = 0
