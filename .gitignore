@@ -14,3 +14,6 @@ out/
 # misc
 .DS_Store
 *.tsbuildinfo
+
+# Next.js generated types
+next-env.d.ts
