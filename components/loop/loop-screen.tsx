@@ -111,7 +111,7 @@ export function LoopScreen() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-[1180px] flex-col gap-6 px-8 py-10">
+    <main className="mx-auto flex w-full max-w-[1180px] flex-1 flex-col gap-6 px-8 py-10">
       <header className="flex items-start justify-between gap-6">
         <div>
           <h1 className="text-xl leading-7 font-semibold text-foreground">{candidate.name}</h1>
