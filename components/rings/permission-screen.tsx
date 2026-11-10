@@ -118,7 +118,7 @@ export function PermissionScreen() {
   }
 
   return (
-    <main className="min-h-dvh bg-canvas px-4 pt-6 pb-24 sm:px-8 sm:pt-8 text-sm leading-5 text-body">
+    <main className="flex-1 bg-canvas px-4 pt-6 pb-24 sm:px-8 sm:pt-8 text-sm leading-5 text-body">
       <div className="mx-auto flex max-w-[946px] flex-col gap-4">
         <header className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex flex-col gap-1">
