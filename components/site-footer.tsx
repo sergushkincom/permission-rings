@@ -18,10 +18,10 @@ const LINKS = [
 const link =
   'rounded-sm underline-offset-2 outline-none hover:text-foreground hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-settled'
 
-/** Who made this and where the code is. One thin row under the page, never over it. */
+/** Who made this and where the code is. One thin row pinned to the bottom of the screen, so it shows without scrolling. */
 export function SiteFooter() {
   return (
-    <footer className="flex h-8 shrink-0 items-center justify-between gap-3 border-t border-strong bg-muted px-4 text-xs leading-4 text-muted-foreground sm:px-8">
+    <footer className="sticky bottom-0 z-20 flex h-8 shrink-0 items-center justify-between gap-3 border-t border-strong bg-muted px-4 text-xs leading-4 text-muted-foreground sm:px-8">
       <p className="truncate max-sm:hidden">MIT licensed · Design experiment</p>
       <nav aria-label="About this project" className="flex items-center gap-4 max-sm:w-full max-sm:justify-between">
         {LINKS.map((l) => (
