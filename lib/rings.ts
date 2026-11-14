@@ -79,12 +79,16 @@ export function entityRadius(entity: Entity, ring: RingKey) {
 
 /** Median days to book a four-person loop. Monotonic: every move inward lowers it. */
 export function loopDays(policies: Policies, context: ContextKey) {
-  let score = 0
+  let anyCount = 0
+  let hoursCount = 0
   for (const p of people) {
     const ring = policies[p.id][context]
-    if (ring === 'any') score += 1
-    else if (ring === 'hours') score += 0.45
+    if (ring === 'any') anyCount++
+    else if (ring === 'hours') hoursCount++
   }
+  // Weight open hours once. Adding 0.45 fourteen times leaves the day count
+  // just under 6.45, which rounds to 6.4 instead of 6.5.
+  const score = anyCount + hoursCount * 0.45
   return Math.round((1.5 + 9 * (1 - score / people.length)) * 10) / 10
 }
 
