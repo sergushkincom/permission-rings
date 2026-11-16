@@ -6,7 +6,7 @@ turning every booking into a request?
 
 [Live demo →](https://permission-rings.vercel.app)
 
-![Fourteen faces on three concentric rings around the hiring manager, each face sized by interview hours a week; a scoreboard above shows how many people the scheduler can book over focus, in open hours, or only after asking](./public/preview-rings.png)
+![Animated demo of the rings interaction: Jonas Becker is dragged from the outer Ask first ring toward the center Any time ring, and the top booking counters update during the move](./public/demo-drag.gif)
 
 *Rings — drag a face inward to let the scheduler book more freely, outward to make it ask. The numbers above move while you drag.*
 
