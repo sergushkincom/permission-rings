@@ -1,3 +1,7 @@
+[![CI](https://github.com/sergushkincom/permission-rings/actions/workflows/ci.yml/badge.svg)](https://github.com/sergushkincom/permission-rings/actions/workflows/ci.yml)
+[![MIT](https://img.shields.io/github/license/sergushkincom/permission-rings)](https://github.com/sergushkincom/permission-rings/blob/main/LICENSE)
+[![Live](https://img.shields.io/badge/Live-demo-0E8A16)](https://permission-rings.vercel.app)
+
 # Permission rings
 
 **The question:** when a scheduling agent can take other people's time, how does a
