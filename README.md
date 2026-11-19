@@ -120,6 +120,10 @@ pnpm dev
 # → http://localhost:3000/loop one candidate's loop
 ```
 
+Checks: `pnpm typecheck`, `pnpm lint`, `pnpm test` (unit), `pnpm test:e2e`
+(Playwright: drags a face onto the inner ring and checks the counters; run
+`pnpm exec playwright install chromium` once first).
+
 Next.js 16 · React 19 · Tailwind 4 · Base UI. No backend, no model calls; the
 scheduler's behaviour is scripted and the people are invented.
 

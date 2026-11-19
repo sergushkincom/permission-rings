@@ -253,7 +253,7 @@ export function RingField({
       </span>
 
       <img
-        src="/faces/denys.png"
+        src="/faces/denys.webp"
         alt="You, hiring manager"
         draggable={false}
         className="pointer-events-none absolute size-16 -translate-x-1/2 -translate-y-1/2 rounded-full object-cover ring-2 ring-card"
@@ -341,7 +341,7 @@ export function RingField({
                 >
                   <span aria-hidden="true">{initials(entity.person.name)}</span>
                   <img
-                    src={`/faces/${entity.id}.png`}
+                    src={`/faces/${entity.id}.webp`}
                     alt=""
                     draggable={false}
                     className="absolute inset-0 size-full object-cover"

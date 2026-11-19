@@ -88,7 +88,7 @@ export function ActionBar({ starting, onStart }: { starting: boolean; onStart: (
                 </div>
                 <div className="flex min-w-0 items-center gap-2">
                   <img
-                    src={`/faces/${r.interviewerId}.png`}
+                    src={`/faces/${r.interviewerId}.webp`}
                     alt=""
                     className="size-6 shrink-0 rounded-full border-2 border-alert object-cover"
                   />
