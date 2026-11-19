@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { Briefcase, ClipboardCheck, UserPlus } from 'lucide-react'
 import type { ContextKey, OutsideKind, RingKey } from '@/lib/panel-data'
 import {
@@ -20,12 +20,17 @@ import {
   type Expiry,
   type Policies,
 } from '@/lib/rings'
-import { EASE_SETTLE, TIMING } from '@/lib/motion'
+import { EASE_SETTLE, TIMING, useReducedMotion } from '@/lib/motion'
 import { cn } from '@/lib/utils'
 
 const TOOLTIP_HEIGHT = 28
 const TOOLTIP_INSET = 8
 const TOOLTIP_HALF_WIDTH = 130
+/** How far past the ring a dropped face travels before settling, in field pixels. */
+const LAND_OVERSHOOT = 10
+
+type Point = { x: number; y: number }
+type Land = { id: string; from: string; over: string; to: string }
 
 const OUTSIDE_ICON: Record<OutsideKind, typeof UserPlus> = {
   candidates: UserPlus,
@@ -95,12 +100,23 @@ export function RingField({
   onSelect,
   onDrop,
 }: RingFieldProps) {
+  const reduced = useReducedMotion()
   const fieldRef = useRef<HTMLDivElement>(null)
   const pressRef = useRef<{ id: string; x: number; y: number; offsetX: number; offsetY: number } | null>(null)
   const draggedRef = useRef(false)
   const [drag, setDrag] = useState<DragState | null>(null)
+  const [land, setLand] = useState<Land | null>(null)
   const [hoverId, setHoverId] = useState<string | null>(null)
   const [rejectCount, setRejectCount] = useState(0)
+
+  useEffect(() => {
+    if (!land) return
+    const id = land.id
+    const timeout = window.setTimeout(() => {
+      setLand((current) => (current?.id === id ? null : current))
+    }, TIMING.land + 50)
+    return () => window.clearTimeout(timeout)
+  }, [land])
 
   function toField(e: ReactPointerEvent) {
     const rect = fieldRef.current?.getBoundingClientRect()
@@ -128,6 +144,7 @@ export function RingField({
     const press = pressRef.current
     if (!press || press.id !== entity.id) return
     if (!draggedRef.current && Math.hypot(e.clientX - press.x, e.clientY - press.y) < 8) return
+    if (!draggedRef.current) setLand((current) => (current?.id === entity.id ? null : current))
     draggedRef.current = true
     const pointer = toField(e)
     const p = { x: pointer.x - press.offsetX, y: pointer.y - press.offsetY }
@@ -149,6 +166,15 @@ export function RingField({
     if (!current || current.id !== entity.id) return
     if (current.valid) onDrop(entity.id, current.ring)
     else setRejectCount((n) => n + 1)
+    if (!draggedRef.current || reduced) return
+
+    const originRing = policies[entity.id][context]
+    const nextRing = current.valid ? current.ring : originRing
+    const origin = polar(entity.angle, entityRadius(entity, originRing))
+    const target = polar(entity.angle, entityRadius(entity, nextRing))
+    const from = { x: current.x, y: current.y }
+    const next = landingSpring(entity.id, entity.size, origin, from, target)
+    if (next) setLand(next)
   }
 
   function handleCancel() {
@@ -225,6 +251,7 @@ export function RingField({
             strokeWidth={2.5}
             opacity={0}
             className="anim-ring-land"
+            style={{ animationDuration: `${TIMING.ringFlash}ms` }}
           />
         )}
       </svg>
@@ -272,6 +299,7 @@ export function RingField({
         const scaled = isDragging || (hoverId === entity.id && !drag)
         const selfSet = locked.has(entity.id)
         const expiry = expiries[entity.id]
+        const landing = stagger || reduced ? null : land?.id === entity.id ? land : null
         const label =
           entity.kind === 'person'
             ? [
@@ -301,6 +329,10 @@ export function RingField({
             onFocus={() => setHoverId(entity.id)}
             onBlur={() => setHoverId((h) => (h === entity.id ? null : h))}
             onClick={() => handleClick(entity.id)}
+            onAnimationEnd={(event) => {
+              if (event.animationName !== 'face-land' || event.target !== event.currentTarget) return
+              setLand((current) => (current?.id === entity.id ? null : current))
+            }}
             className={cn(
               'absolute left-0 top-0 flex items-center justify-center rounded-full font-semibold outline-none',
               'focus-visible:outline-2 focus-visible:outline-offset-[6px] focus-visible:outline-settled',
@@ -311,25 +343,10 @@ export function RingField({
               selected && !isCandidates && 'outline-2 outline-offset-[6px] outline-settled',
               selected && isCandidates && 'outline-2 outline-offset-2 outline-alert',
               lit && 'outline-2 outline-offset-2 outline-settled',
-              isDragging ? 'z-30 shadow-float' : hoverId === entity.id || lit ? 'z-20' : 'z-10',
+              landing && 'anim-face-land',
+              isDragging ? 'z-30 shadow-float' : landing ? 'z-30' : hoverId === entity.id || lit ? 'z-20' : 'z-10',
             )}
-            style={{
-              width: entity.size,
-              height: entity.size,
-              fontSize: Math.max(10, Math.round(entity.size * 0.3)),
-              translate: `${pos.x - entity.size / 2}px ${pos.y - entity.size / 2}px`,
-              scale: scaled ? '1.08' : '1',
-              opacity: dimmed ? 0.4 : 1,
-              transition: isDragging
-                ? 'scale 120ms ease-out'
-                : [
-                    stagger
-                      ? `translate ${TIMING.travel}ms ${EASE_SETTLE} ${index * TIMING.travelStagger}ms`
-                      : `translate ${TIMING.settle}ms ${EASE_SETTLE} ${TIMING.settleDelay}ms`,
-                    'scale 120ms ease-out',
-                    'opacity 150ms ease-out',
-                  ].join(', '),
-            }}
+            style={faceStyle(entity.size, pos, scaled, dimmed, isDragging, landing, stagger, index)}
           >
             {entity.kind === 'person' ? (
               <>
@@ -400,6 +417,70 @@ export function RingField({
       )}
     </div>
   )
+}
+
+function faceStyle(
+  size: number,
+  pos: Point,
+  scaled: boolean,
+  dimmed: boolean,
+  isDragging: boolean,
+  landing: Land | null,
+  stagger: boolean,
+  index: number,
+): CSSProperties {
+  const translate = `${pos.x - size / 2}px ${pos.y - size / 2}px`
+  const transition = isDragging
+    ? 'scale 120ms ease-out'
+    : landing
+      ? 'scale 120ms ease-out, opacity 150ms ease-out'
+      : [
+          stagger
+            ? `translate ${TIMING.travel}ms ${EASE_SETTLE} ${index * TIMING.travelStagger}ms`
+            : `translate ${TIMING.settle}ms ${EASE_SETTLE} ${TIMING.settleDelay}ms`,
+          'scale 120ms ease-out',
+          'opacity 150ms ease-out',
+        ].join(', ')
+
+  return {
+    width: size,
+    height: size,
+    fontSize: Math.max(10, Math.round(size * 0.3)),
+    translate,
+    scale: scaled ? '1.08' : '1',
+    opacity: dimmed ? 0.4 : 1,
+    transition,
+    ...(landing
+      ? ({
+          animationDuration: `${TIMING.land}ms`,
+          '--land-from': landing.from,
+          '--land-over': landing.over,
+          '--land-to': landing.to,
+        } as CSSProperties)
+      : {}),
+  }
+}
+
+/** Past the resting point, along the direction the face was moved. */
+function landingSpring(id: string, size: number, origin: Point, from: Point, target: Point): Land | null {
+  const travel = { x: target.x - origin.x, y: target.y - origin.y }
+  const travelDist = Math.hypot(travel.x, travel.y)
+  const release = { x: target.x - from.x, y: target.y - from.y }
+  const releaseDist = Math.hypot(release.x, release.y)
+  let dirx = 0
+  let diry = 0
+  if (travelDist > 0.5) {
+    dirx = travel.x / travelDist
+    diry = travel.y / travelDist
+  } else if (releaseDist > 0.5) {
+    dirx = release.x / releaseDist
+    diry = release.y / releaseDist
+  } else {
+    return null
+  }
+  const over = { x: target.x + dirx * LAND_OVERSHOOT, y: target.y + diry * LAND_OVERSHOOT }
+  const toPx = (point: Point) => `${point.x - size / 2}px ${point.y - size / 2}px`
+  return { id, from: toPx(from), over: toPx(over), to: toPx(target) }
 }
 
 function TemporaryArc({ size, color }: { size: number; color: string }) {

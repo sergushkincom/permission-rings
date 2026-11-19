@@ -18,9 +18,12 @@ async function center(locator: Locator) {
   return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
 }
 
-test('dragging a face onto the inner ring updates the top counters', async ({ page }) => {
-  await page.goto('/')
+function toMs(duration: string) {
+  const value = Number.parseFloat(duration)
+  return duration.endsWith('ms') ? value : value * 1000
+}
 
+async function dragOpenHoursFaceToAnyTime(page: Page) {
   const anyTime = counter(page, 'Books over focus')
   const openHours = counter(page, 'Waits for open time')
   const askFirst = counter(page, 'Asks you first')
@@ -51,6 +54,56 @@ test('dragging a face onto the inner ring updates the top counters', async ({ pa
   await page.mouse.down()
   await page.mouse.move(to.x, to.y, { steps: 30 })
   await page.mouse.up()
+
+  return { face, anyTime, openHours, askFirst, before }
+}
+
+test('dragging a face onto the inner ring updates the top counters', async ({ page }) => {
+  await page.goto('/')
+  const { face, anyTime, openHours, askFirst, before } = await dragOpenHoursFaceToAnyTime(page)
+
+  // The drop plays a short spring and the chosen ring pulses. Both are gone under reduced motion.
+  await expect(face).toHaveClass(/anim-face-land/)
+  const faceMotion = await face.evaluate((el) => {
+    const style = getComputedStyle(el)
+    return {
+      name: style.animationName,
+      duration: style.animationDuration,
+      over: (el as HTMLElement).style.getPropertyValue('--land-over'),
+      to: (el as HTMLElement).style.getPropertyValue('--land-to'),
+    }
+  })
+  expect(faceMotion.name).toBe('face-land')
+  expect(toMs(faceMotion.duration)).toBeGreaterThanOrEqual(300)
+  expect(toMs(faceMotion.duration)).toBeLessThanOrEqual(450)
+  expect(faceMotion.over).not.toBe('')
+  expect(faceMotion.over).not.toBe(faceMotion.to)
+
+  const ring = page.locator('circle.anim-ring-land')
+  await expect(ring).toHaveCount(1)
+  const ringMotion = await ring.evaluate((el) => {
+    const style = getComputedStyle(el)
+    return { name: style.animationName, duration: style.animationDuration }
+  })
+  expect(ringMotion.name).toBe('ring-land')
+  expect(toMs(ringMotion.duration)).toBeGreaterThanOrEqual(300)
+  expect(toMs(ringMotion.duration)).toBeLessThanOrEqual(450)
+
+  await expect(face).toHaveAttribute('aria-label', /Any time/)
+  await expect(anyTime).toHaveText(String(before.any + 1))
+  await expect(openHours).toHaveText(String(before.hours - 1))
+  await expect(askFirst).toHaveText(String(before.ask))
+})
+
+test('reduced motion places a dropped face without a spring or ring pulse', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+  const { face, anyTime, openHours, askFirst, before } = await dragOpenHoursFaceToAnyTime(page)
+
+  await expect(face).not.toHaveClass(/anim-face-land/)
+  const ring = page.locator('circle.anim-ring-land')
+  await expect(ring).toHaveCount(1)
+  await expect.poll(() => ring.evaluate((el) => getComputedStyle(el).animationName)).toBe('none')
 
   await expect(face).toHaveAttribute('aria-label', /Any time/)
   await expect(anyTime).toHaveText(String(before.any + 1))
