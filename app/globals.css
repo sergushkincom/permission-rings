@@ -311,17 +311,45 @@
 
 @keyframes ring-land {
   0% {
-    opacity: 0;
+    opacity: 0.45;
+    stroke-width: 3;
   }
-  33% {
+  28% {
     opacity: 1;
+    stroke-width: 7;
+  }
+  68% {
+    opacity: 0.8;
+    stroke-width: 5.5;
   }
   100% {
     opacity: 0;
+    stroke-width: 2.5;
   }
 }
 .anim-ring-land {
-  animation: ring-land 360ms linear forwards;
+  animation: ring-land 400ms linear forwards;
+}
+
+/* Release point, a few pixels past the ring, then the resting point.
+   Per-keyframe easing arrives softly at the overshoot and settles without a second bounce. */
+@keyframes face-land {
+  0% {
+    translate: var(--land-from);
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  60% {
+    translate: var(--land-over);
+    animation-timing-function: cubic-bezier(0.45, 0, 0.2, 1);
+  }
+  100% {
+    translate: var(--land-to);
+  }
+}
+.anim-face-land {
+  animation-name: face-land;
+  animation-duration: 400ms;
+  animation-fill-mode: both;
 }
 
 @keyframes lift {
@@ -374,7 +402,9 @@
   }
   .anim-lift,
   .anim-tooltip,
-  .anim-undo-in {
+  .anim-undo-in,
+  .anim-face-land,
+  .anim-ring-land {
     animation: none;
   }
   .anim-undo-out {
