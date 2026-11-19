@@ -13,7 +13,7 @@ export function PersonCell({ person }: { person: Person | null }) {
   return (
     <div className="flex min-w-0 items-center gap-3">
       <img
-        src={`/faces/${person.id}.png`}
+        src={`/faces/${person.id}.webp`}
         alt=""
         width={32}
         height={32}
