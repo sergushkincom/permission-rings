@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Check } from 'lucide-react'
 import { DAYS, people, type Replacement, type Slot, type TimeOption } from '@/lib/loop-data'
 import { PersonCell } from './person-cell'
 import { TimePicker } from './time-picker'
@@ -14,6 +15,7 @@ type SlotCardProps = {
 }
 
 type Panel = 'picker' | 'replacements' | null
+type OpenKind = 'waiting' | 'declined'
 
 const BAR = {
   confirmed: 'bg-settled',
@@ -25,15 +27,30 @@ const actionClass =
   'rounded-sm text-[13px] leading-5 font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-settled'
 
 export function SlotCard({ slot, onApprove, onBook, onChoose }: SlotCardProps) {
-  const [panel, setPanel] = useState<Panel>(null)
-  const toggle = (next: Exclude<Panel, null>) => setPanel((p) => (p === next ? null : next))
   const { state } = slot
+  const [panel, setPanel] = useState<Panel>(null)
+  const [trackedKind, setTrackedKind] = useState(state.kind)
+  const [settledFrom, setSettledFrom] = useState<OpenKind | null>(null)
+
+  if (state.kind !== trackedKind) {
+    setTrackedKind(state.kind)
+    if (trackedKind !== 'confirmed' && state.kind === 'confirmed') {
+      setSettledFrom(trackedKind)
+    }
+  }
+
+  const showSettle = state.kind === 'confirmed' && settledFrom !== null
+  const toggle = (next: Exclude<Panel, null>) => setPanel((p) => (p === next ? null : next))
   const person = slot.person ? people[slot.person] : null
   const panelId = `${slot.id}-panel`
 
   return (
-    <li className="flex overflow-hidden rounded-xl border border-hairline bg-card shadow-xs">
-      <div aria-hidden="true" className={`w-1 shrink-0 transition-colors duration-300 ${BAR[state.kind]}`} />
+    <li
+      className={`flex overflow-hidden rounded-xl border border-hairline bg-card shadow-xs${showSettle ? ' anim-slot-settle' : ''}`}
+    >
+      <div aria-hidden="true" className={`relative w-1 shrink-0 ${showSettle ? BAR[settledFrom] : BAR[state.kind]}`}>
+        {showSettle && <span className="anim-slot-stripe absolute inset-0 bg-settled" />}
+      </div>
       <div className="min-w-0 flex-1 px-5 py-4">
         <div className="grid grid-cols-[170px_230px_minmax(0,1fr)_auto] items-center gap-6">
           <div>
@@ -46,8 +63,15 @@ export function SlotCard({ slot, onApprove, onBook, onChoose }: SlotCardProps) {
           <div className="min-w-0">
             {state.kind === 'confirmed' && (
               <>
-                <p className="text-sm leading-5 font-semibold tabular-nums text-foreground">
+                <p className="flex items-center gap-1.5 text-sm leading-5 font-semibold tabular-nums text-foreground">
                   {DAYS[state.day]}, {state.time}
+                  {showSettle && (
+                    <Check
+                      aria-hidden="true"
+                      strokeWidth={2.25}
+                      className="anim-slot-check size-3.5 shrink-0 text-settled"
+                    />
+                  )}
                 </p>
                 <p className="flex items-center gap-1.5 text-[13px] leading-[18px] text-muted-foreground">
                   {state.overFocus ? (

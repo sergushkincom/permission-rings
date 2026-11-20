@@ -391,6 +391,51 @@
   animation: moved-flash 1.4s ease-out forwards;
 }
 
+/* A slot card settling into confirmed. The stripe, check, and highlight are
+   authored in their final state; reduced motion drops the animation. */
+@keyframes slot-stripe-fill {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes slot-check-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slot-settle-flash {
+  0%,
+  28% {
+    background-color: color-mix(in srgb, var(--settled) 16%, var(--card));
+  }
+  100% {
+    background-color: var(--card);
+  }
+}
+
+.anim-slot-stripe {
+  transform-origin: top;
+  animation: slot-stripe-fill 420ms cubic-bezier(0.33, 0.1, 0.25, 1) both;
+}
+
+.anim-slot-check {
+  animation: slot-check-in 200ms cubic-bezier(0.22, 1, 0.36, 1) 120ms both;
+}
+
+.anim-slot-settle {
+  animation: slot-settle-flash 480ms ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .anim-number-out,
   .anim-number-in,
@@ -404,7 +449,10 @@
   .anim-tooltip,
   .anim-undo-in,
   .anim-face-land,
-  .anim-ring-land {
+  .anim-ring-land,
+  .anim-slot-settle,
+  .anim-slot-stripe,
+  .anim-slot-check {
     animation: none;
   }
   .anim-undo-out {
