@@ -384,6 +384,31 @@
   opacity: 0;
   transition: opacity 200ms ease-in;
 }
+
+/* Shrinks across the 6s hold. --undo-enter / --undo-hold come from the toast. */
+@keyframes undo-meter {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+.undo-meter-fill {
+  transform-origin: left;
+  transform: scaleX(1);
+  animation-name: undo-meter;
+  animation-duration: var(--undo-hold, 6000ms);
+  animation-delay: var(--undo-enter, 150ms);
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+.undo-paused .undo-meter-fill {
+  animation-play-state: paused;
+}
+.undo-time {
+  display: none;
+}
 .anim-ring-alert {
   animation: ring-alert 1.1s ease-out;
 }
@@ -452,8 +477,15 @@
   .anim-ring-land,
   .anim-slot-settle,
   .anim-slot-stripe,
-  .anim-slot-check {
+  .anim-slot-check,
+  .undo-meter-fill {
     animation: none;
+  }
+  .undo-meter {
+    display: none;
+  }
+  .undo-time {
+    display: inline;
   }
   .anim-undo-out {
     transition: none;
